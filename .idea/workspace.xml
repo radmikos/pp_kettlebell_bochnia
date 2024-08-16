@@ -5,17 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="51138e53-4f4e-49ce-952d-3321dbb46069" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Pipfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/kb_app/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/kb_app/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/kb_app/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/kb_app/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/kb_app/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/kb_app/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/kb_app/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/kb_app/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kettlebell_app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/kettlebell_app/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kettlebell_app/kettlebell_app/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/kettlebell_app/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
