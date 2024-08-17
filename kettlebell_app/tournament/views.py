@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from kettlebell_app.kb_app.models import Player  # Importuj inne modele, jeśli są potrzebne
+from kettlebell_app.tournament.models import Player
 
 
 def index(request):
