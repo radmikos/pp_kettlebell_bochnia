@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
-class KettlebellAppConfig(AppConfig):
+class TournamentAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'kettlebell_app'
+    name = 'tournament'

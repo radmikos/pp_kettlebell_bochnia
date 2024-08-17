@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path('', include('kb_app.urls')),  # Replace 'your_app_name' with your actual app name
+    path('', include('kb_app.urls')),
     path('admin/', admin.site.urls),
 ]
 
