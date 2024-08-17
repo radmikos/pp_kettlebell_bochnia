@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from kettlebell_app.tournament.models import Player
+from .models import Player
 
 
 def index(request):

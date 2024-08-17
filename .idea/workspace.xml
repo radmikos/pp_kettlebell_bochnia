@@ -5,21 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="51138e53-4f4e-49ce-952d-3321dbb46069" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0001_initial.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kb_app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kb_app/admin.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kb_app/apps.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kb_app/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kb_app/models.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kb_app/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kb_app/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kb_app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kb_app/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/kettlebell_app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/kettlebell_app/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,6 +49,11 @@
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/kettlebell_app/tournament" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
