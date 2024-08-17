@@ -21,3 +21,5 @@ urlpatterns = [
     path('', include('kb_app.urls')),  # Replace 'your_app_name' with your actual app name
     path('admin/', admin.site.urls),
 ]
+
+
