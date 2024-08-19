@@ -5,9 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="51138e53-4f4e-49ce-952d-3321dbb46069" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0001_initial.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -45,11 +44,14 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "develop",
-    "last_opened_file_path": "/Users/macbookpro/development/kettlebell_app/pp_kettlebell_bochnia",
+    "last_opened_file_path": "/Users/macbookpro/development/kettlebell_app/pp_kettlebell_bochnia/kettlebell_app/kettlebell_app",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/kettlebell_app/kettlebell_app" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/kettlebell_app/tournament" />
     </key>

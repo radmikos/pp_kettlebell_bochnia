@@ -3,6 +3,6 @@ from .models import Player
 
 
 def index(request):
-    players = Player.objects.all()  # Przykład: pobierz wszystkich graczy
+    players = Player.objects.all()
     context = {'players': players}
-    return render(request, 'kettlebell_app/index.html', context)
+    return render(request, 'index.html', context)

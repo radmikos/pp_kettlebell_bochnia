@@ -70,7 +70,7 @@ class Results2xKBSQAD(models.Model):
     weight = models.FloatField()
 
     def body_percent_weight(self):
-        return (self.weight / self.player.waga) * 100
+        return (self.weight / self.player.weight) * 100
 
     def __str__(self):
         return f"{self.player} - 2xKBSQAD: {self.weight} kg ({self.body_percent_weight():.2f}%)"
