@@ -1,18 +1,10 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Kettlebell App</title>
-</head>
-<body>
-    <h1>Witaj w aplikacji Kettlebell</h1>
-    <h2>Lista zawodników:</h2>
-    <ul>
-    {% for player in players %}
-        <li>{{ player.name }} {{ player.surname }} - {{ player.weight }} kg</li>
+<h1>Witaj na stronie zawodów</h1>
+
+<h2>Kategorie:</h2>
+<ul>
+    {% for category in categories %}
+        <li><a href="{% url 'category_results' category.name %}">{{ category.name }}</a></li>
     {% empty %}
-        <li>Brak zawodników w bazie danych.</li>
+        <li>Brak dostępnych kategorii</li>
     {% endfor %}
-    </ul>
-</body>
-</html>
+</ul>
