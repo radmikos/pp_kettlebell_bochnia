@@ -18,7 +18,7 @@ class Category(models.Model):
 class Player(models.Model):
     name = models.CharField(max_length=50)
     surname = models.CharField(max_length=50)
-    weight = models.FloatField()
+    weight = models.FloatField(null=True, blank=True, default=0)
     club = models.ForeignKey(SportClub, on_delete=models.CASCADE)
     categories = models.ManyToManyField(Category)
 
