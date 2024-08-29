@@ -1,10 +1,46 @@
-<h1>Witaj na stronie zawodów</h1>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona główna zawodów</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
+        header { background: #f4f4f4; padding: 1rem; text-align: center; }
+        main { padding: 2rem; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin-bottom: 10px; }
+        a { color: #333; text-decoration: none; }
+        a:hover { color: #666; }
+        footer { background: #333; color: #fff; text-align: center; padding: 1rem; position: fixed; bottom: 0; width: 100%; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Witaj na stronie zawodów</h1>
+    </header>
 
-<h2>Kategorie:</h2>
-<ul>
-    {% for category in categories %}
-        <li><a href="{% url 'category_results' category.name %}">{{ category.name }}</a></li>
-    {% empty %}
-        <li>Brak dostępnych kategorii</li>
-    {% endfor %}
-</ul>
+    <main>
+        <section>
+            <h2>Kategorie:</h2>
+            <ul>
+                <li><a href="{% url 'amator_kobiety_do_65kg' %}">Amator Kobiety do 65kg</a></li>
+                <li><a href="{% url 'amator_kobiety_powyzej_65kg' %}">Amator Kobiety powyżej 65kg</a></li>
+                <li><a href="{% url 'amator_mezczyzni_do_85kg' %}">Amator Mężczyźni do 85kg</a></li>
+                <li><a href="{% url 'amator_mezczyzni_powyzej_85kg' %}">Amator Mężczyźni powyżej 85kg</a></li>
+                <li><a href="{% url 'masters_kobiety' %}">Masters Kobiety</a></li>
+                <li><a href="{% url 'masters_mezczyzni' %}">Masters Mężczyźni</a></li>
+                <li><a href="{% url 'najlepsza_bochnianka' %}">Najlepsza Bochnianka</a></li>
+                <li><a href="{% url 'najlepszy_bochnianin' %}">Najlepszy Bochnianin</a></li>
+                <li><a href="{% url 'pro_kobiety' %}">Pro Kobiety</a></li>
+                <li><a href="{% url 'pro_mezczyzni_do_85kg' %}">Pro Mężczyźni do 85kg</a></li>
+                <li><a href="{% url 'pro_mezczyzni_powyzej_85kg' %}">Pro Mężczyźni powyżej 85kg</a></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Nazwa Twoich Zawodów. Wszelkie prawa zastrzeżone.</p>
+    </footer>
+</body>
+</html>
