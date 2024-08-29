@@ -5,8 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="51138e53-4f4e-49ce-952d-3321dbb46069" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0002_remove_seesawpressweight_player_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0003_rename_snatch_sum_weight_player_number_of_snatches.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0004_player_snatch_kettlebell_weight_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0005_remove_player_number_of_snatches.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0006_rename_weightcategory_category.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0007_remove_player_level_remove_player_category_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0008_player_kb_sqad_place_player_see_saw_press_place_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0009_remove_category_weight.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0010_rename_kb_sqad_place_player_final_score_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0011_remove_player_final_score_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0012_remove_seesawpressresult_category_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0013_player_kb_sqad_score_player_see_saw_press_score_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0014_rename_kb_sqad_weight_player_kb_squat_weight_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/migrations/0015_kbsquatresult_overallresult_seesawpressresult_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kettlebell_app/tournament/templates/category_results.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/pp_kettlebell_bochnia.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pp_kettlebell_bochnia.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kettlebell_app/tournament/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/kettlebell_app/tournament/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -38,21 +57,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "develop",
-    "last_opened_file_path": "/Users/macbookpro/development/kettlebell_app/pp_kettlebell_bochnia/kettlebell_app/kettlebell_app",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/macbookpro/development/kettlebell_app/pp_kettlebell_bochnia/kettlebell_app/kettlebell_app&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/kettlebell_app/kettlebell_app" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/kettlebell_app/tournament/templates" />
+      <recent name="$PROJECT_DIR$/kettlebell_app/tournament/templates/category" />
       <recent name="$PROJECT_DIR$/kettlebell_app/tournament" />
     </key>
   </component>
