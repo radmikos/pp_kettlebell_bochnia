@@ -108,8 +108,6 @@ def amator_kobiety_powyzej_65kg(request):
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'amator-kobiety-powyzej-65kg.html', {'results': results})
 
-# Utwórz podobne funkcje dla pozostałych kategorii...
-
 def amator_mezczyzni_do_85kg(request):
     category = Category.objects.get(name='Pro_Mężczyźni_powyżej_85kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
@@ -155,6 +153,6 @@ def pro_mezczyzni_do_85kg(request):
     return render(request, 'amator-kobiety-do-65kg.html', {'results': results})
 
 def pro_mezczyzni_powyzej_85kg(request):
-    category = Category.objects.get(name='Amator_Kobiety_powyżej_65kg')
+    category = Category.objects.get(name='Pro_Mężczyźni_powyżej_85kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
-    return render(request, 'amator-kobiety-powyzej-65kg.html', {'results': results})
+    return render(request, 'pro-mezczyzni-powyzej-85kg.html', {'results': results})

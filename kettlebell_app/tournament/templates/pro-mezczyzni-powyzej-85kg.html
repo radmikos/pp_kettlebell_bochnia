@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gfdgfdsgdfgfdsgs - Wyniki</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
+        header { background: #f4f4f4; padding: 1rem; text-align: center; }
+        main { padding: 2rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        footer { background: #333; color: #fff; text-align: center; padding: 1rem; position: fixed; bottom: 0; width: 100%; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Afdsfdsafdsafdsadsfdsakg - Wyniki</h1>
+    </header>
+
+    <main>
+        <table>
+            <tr>
+                <th>Miejsce</th>
+                <th>Imię i Nazwisko</th>
+                <th>Klub</th>
+                <th>Wynik Rwania</th>
+                <th>Wynik TGU</th>
+                <th>Suma punktów</th>
+            </tr>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.final_position }}</td>
+                <td>{{ result.player.name }} {{ result.player.surname }}</td>
+                <td>{{ result.player.club.name }}</td>
+                <td>{{ result.snatch_points }}</td>
+                <td>{{ result.tgu_points }}</td>
+                <td>{{ result.total_points }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Nazwa Twoich Zawodów. Wszelkie prawa zastrzeżone.</p>
+    </footer>
+</body>
+</html>
