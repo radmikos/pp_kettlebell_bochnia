@@ -18,7 +18,14 @@
     <header>
         <h1>Amator Kobiety do 65kg - Wyniki</h1>
     </header>
-
+    <div style="background-color: #f0f0f0; padding: 10px; margin-bottom: 20px;">
+        <h3>Debug Info:</h3>
+        <p>Number of overall results: {{ overall_results|length }}</p>
+        <p>Number of snatch results: {{ snatch_results|length }}</p>
+        <p>Number of TGU results: {{ tgu_results|length }}</p>
+        <p>Number of see saw results: {{ see_saw_results|length }}</p>
+        <p>Number of KB squat results: {{ kb_squat_results|length }}</p>
+    </div>
     <main>
         <table>
             <tr>

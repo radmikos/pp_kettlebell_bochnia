@@ -1,49 +1,166 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amator Kobiety do 65kg - Wyniki</title>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
-        header { background: #f4f4f4; padding: 1rem; text-align: center; }
-        main { padding: 2rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        footer { background: #333; color: #fff; text-align: center; padding: 1rem; position: fixed; bottom: 0; width: 100%; }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Amator Kobiety do 65kg - Wyniki</h1>
-    </header>
+<h1>{{ category_name }}</h1>
 
-    <main>
-        <table>
-            <tr>
-                <th>Miejsce</th>
-                <th>Imię i Nazwisko</th>
-                <th>Klub</th>
-                <th>Wynik Rwania</th>
-                <th>Wynik TGU</th>
-                <th>Suma punktów</th>
-            </tr>
-            {% for result in results %}
-            <tr>
-                <td>{{ result.final_position }}</td>
-                <td>{{ result.player.name }} {{ result.player.surname }}</td>
-                <td>{{ result.player.club.name }}</td>
-                <td>{{ result.snatch_points }}</td>
-                <td>{{ result.tgu_points }}</td>
-                <td>{{ result.total_points }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </main>
+<h2>Wyniki ogólne</h2>
 
-    <footer>
-        <p>&copy; 2023 Nazwa Twoich Zawodów. Wszelkie prawa zastrzeżone.</p>
-    </footer>
-</body>
-</html>
+<table>
+    <thead>
+        <tr>
+            <th>Nazwisko</th>
+            <th>Imię</th>
+            <th>Waga</th>
+            <th>TGU Miejsce</th>
+            <th>Press Miejsce</th>
+            <th>Squat Miejsce</th>
+            <th>Snatch Test Miejsce</th>
+            <th>Total Punkty</th>
+            <th>Total Miejsce</th>
+            <th>Uwagi</th>
+            <th>Ostateczny Wynik</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in overall_results %}
+        <tr>
+            <td>{{ result.player.surname }}</td>
+            <td>{{ result.player.name }}</td>
+            <td>{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
+            <td>{{ result.tgu_place }}</td>
+            <td>{{ result.press_place }}</td>
+            <td>{{ result.squat_place }}</td>
+            <td>{{ result.snatch_place }}</td>
+            <td>{{ result.total_points }}</td>
+            <td>{{ result.total_place }}</td>
+            <td>{% if result.tiebreak %}Dogrywka{% endif %}</td>
+            <td>{{ result.final_score|floatformat:1 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Wyniki See Saw Press</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Miejsce</th>
+            <th>Nazwisko</th>
+            <th>Imię</th>
+            <th>Klub</th>
+            <th>Waga ciała</th>
+            <th>Próba I (L/P)</th>
+            <th>Próba II (L/P)</th>
+            <th>Próba III (L/P)</th>
+            <th>Wynik Max</th>
+            <th>%BW</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in see_saw_results %}
+        <tr>
+            <td>{{ result.position }}</td>
+            <td>{{ result.player.surname }}</td>
+            <td>{{ result.player.name }}</td>
+            <td>{{ result.player.club.name }}</td>
+            <td>{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
+            <td>{{ result.attempt_1 }}</td>
+            <td>{{ result.attempt_2 }}</td>
+            <td>{{ result.attempt_3 }}</td>
+            <td>{{ result.max_result|floatformat:1 }}</td>
+            <td>{{ result.bw_percentage|default_if_none:"-"|floatformat:1 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Wyniki Snatch</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Miejsce</th>
+            <th>Nazwisko</th>
+            <th>Imię</th>
+            <th>Klub / Miasto</th>
+            <th>Waga Ciała</th>
+            <th>Waga odważnika</th>
+            <th>Ilość powtórzeń</th>
+            <th>Waga Odważnika * il. powtórzeń</th>
+            <th>%BW</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in snatch_results %}
+        <tr>
+            <td>{{ result.position }}</td>
+            <td>{{ result.player.surname }}</td>
+            <td>{{ result.player.name }}</td>
+            <td>{{ result.player.club.name }}</td>
+            <td>{{ result.weight }}</td>
+            <td>{{result.player.snatch_kettlebell_weight}}</td>
+            <td>{{ result.player.snatch_repetitions }}</td>
+            <td>{{ result.max_result }}</td>
+            <td>{{ result.bw_percentage|default_if_none:"-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Wyniki TGU</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Miejsce</th>
+            <th>Nazwisko</th>
+            <th>Imię</th>
+            <th>Klub</th>
+            <th>Waga ciała</th>
+            <th>Wynik</th>
+            <th>%BW</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in tgu_results %}
+        <tr>
+            <td>{{ result.position }}</td>
+            <td>{{ result.player.surname }}</td>
+            <td>{{ result.player.name }}</td>
+            <td>{{ result.player.club.name }}</td>
+            <td>{{ result.weight }}</td>
+            <td>{{ result.attempt_1 }}</td>
+            <td>{{ result.bw_percentage }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+<h2>Wyniki KB Squat</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Miejsce</th>
+            <th>Nazwisko</th>
+            <th>Imię</th>
+            <th>Klub</th>
+            <th>Waga ciała</th>
+            <th>Wynik</th>
+            <th>%BW</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in kb_squat_results %}
+        <tr>
+            <td>{{ result.position }}</td>
+            <td>{{ result.player.surname }}</td>
+            <td>{{ result.player.name }}</td>
+            <td>{{ result.player.club.name }}</td>
+            <td>{{ result.weight }}</td>
+            <td>{{ result.attempt_1 }}</td>
+            <td>{{ result.bw_percentage }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
