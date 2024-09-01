@@ -32,11 +32,13 @@ def create_or_update_results(category):
                 defaults={'result': player.kb_squat_body_percent_weight()}
             )
 
+
 def calculate_positions(result_model, category):
     results = result_model.objects.filter(player__categories=category).order_by('-result')
     for position, result in enumerate(results, start=1):
         result.position = position
         result.save()
+
 
 def update_overall_results(category):
     for player in Player.objects.filter(categories=category):
@@ -65,6 +67,7 @@ def index(request):
 
 from django.shortcuts import render
 from .models import Player, Category, OverallResult
+
 
 def category_view(request, category_slug):
     category_mapping = {
@@ -95,33 +98,80 @@ def category_view(request, category_slug):
 
     return render(request, 'category_template.html', context)
 
+
 from django.shortcuts import render
-from .models import Category, OverallResult
+from django.db.models import F, Value
+from django.db.models.functions import Coalesce
+from .models import Category, Player, OverallResult, SnatchResult, TGUResult, SeeSawPressResult, KBSquatResult
+
 
 def amator_kobiety_do_65kg(request):
     category = Category.objects.get(name='Amator_Kobiety_do_65kg')
-    results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
-    return render(request, 'amator-kobiety-do-65kg.html', {'results': results})
+    players = Player.objects.filter(categories=category)
+
+    # Create default results for all players
+    for player in players:
+        OverallResult.objects.get_or_create(player=player, defaults={'total_points': 0})
+        SnatchResult.objects.get_or_create(player=player, defaults={'result': 0})
+        TGUResult.objects.get_or_create(player=player, defaults={'result': 0})
+        SeeSawPressResult.objects.get_or_create(player=player, defaults={'result_left': 0, 'result_right': 0})
+        KBSquatResult.objects.get_or_create(player=player, defaults={'result': 0})
+
+    overall_results = OverallResult.objects.filter(player__in=players).order_by(
+        F('total_points').desc(nulls_last=True), 'player__surname'
+    )
+
+    snatch_results = SnatchResult.objects.filter(player__in=players).order_by(
+        F('result').desc(nulls_last=True), 'player__surname'
+    )
+
+    tgu_results = TGUResult.objects.filter(player__in=players).order_by(
+        F('result').desc(nulls_last=True), 'player__surname'
+    )
+
+    see_saw_results = SeeSawPressResult.objects.filter(player__in=players).order_by(
+        (F('result_left') + F('result_right')).desc(nulls_last=True), 'player__surname'
+    )
+
+    kb_squat_results = KBSquatResult.objects.filter(player__in=players).order_by(
+        F('result').desc(nulls_last=True), 'player__surname'
+    )
+
+    context = {
+        'category_name': 'Amator Kobiety do 65kg',
+        'overall_results': overall_results,
+        'snatch_results': snatch_results,
+        'tgu_results': tgu_results,
+        'see_saw_results': see_saw_results,
+        'kb_squat_results': kb_squat_results,
+    }
+
+    return render(request, 'amator-kobiety-do-65kg.html', context)
+
 
 def amator_kobiety_powyzej_65kg(request):
     category = Category.objects.get(name='Amator_Kobiety_powyżej_65kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'amator-kobiety-powyzej-65kg.html', {'results': results})
 
+
 def amator_mezczyzni_do_85kg(request):
     category = Category.objects.get(name='Pro_Mężczyźni_powyżej_85kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'pro_mezczyzni_powyzej_85kg.html', {'results': results})
+
 
 def amator_mezczyzni_powyzej_85kg(request):
     category = Category.objects.get(name='Amator_Kobiety_do_65kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'amator-kobiety-do-65kg.html', {'results': results})
 
+
 def masters_kobiety(request):
     category = Category.objects.get(name='Amator_Kobiety_powyżej_65kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'amator-kobiety-powyzej-65kg.html', {'results': results})
+
 
 # Utwórz podobne funkcje dla pozostałych kategorii...
 
@@ -130,15 +180,18 @@ def masters_mezczyzni(request):
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'pro_mezczyzni_powyzej_85kg.html', {'results': results})
 
+
 def najlepsza_bochnianka(request):
     category = Category.objects.get(name='Amator_Kobiety_do_65kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'amator-kobiety-do-65kg.html', {'results': results})
 
+
 def najlepszy_bochnianin(request):
     category = Category.objects.get(name='Amator_Kobiety_powyżej_65kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'amator-kobiety-powyzej-65kg.html', {'results': results})
+
 
 # Utwórz podobne funkcje dla pozostałych kategorii...
 
@@ -147,12 +200,19 @@ def pro_kobiety(request):
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'pro_mezczyzni_powyzej_85kg.html', {'results': results})
 
+
 def pro_mezczyzni_do_85kg(request):
     category = Category.objects.get(name='Amator_Kobiety_do_65kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'amator-kobiety-do-65kg.html', {'results': results})
 
+
 def pro_mezczyzni_powyzej_85kg(request):
     category = Category.objects.get(name='Pro_Mężczyźni_powyżej_85kg')
     results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
     return render(request, 'pro-mezczyzni-powyzej-85kg.html', {'results': results})
+
+def nagroda_specjalna(request):
+    category = Category.objects.get(name='Nagroda_specjalna')
+    results = OverallResult.objects.filter(player__categories=category).order_by('final_position')
+    return render(request, 'nagroda-specjalna.html', {'results': results})

@@ -22,4 +22,5 @@ urlpatterns = [
     path('pro-kobiety/', views.pro_kobiety, name='pro_kobiety'),
     path('pro-mezczyzni-do-85kg/', views.pro_mezczyzni_do_85kg, name='pro_mezczyzni_do_85kg'),
     path('pro-mezczyzni-powyzej-85kg/', views.pro_mezczyzni_powyzej_85kg, name='pro_mezczyzni_powyzej_85kg'),
+    path('nagroda-specjalna/', views.nagroda_specjalna, name='nagroda_specjalna'),
 ]
