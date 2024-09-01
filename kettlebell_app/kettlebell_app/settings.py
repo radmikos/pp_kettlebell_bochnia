@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "tournament",
     "import_export",
-    'channels',
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -73,24 +73,17 @@ TEMPLATES = [
 WSGI_APPLICATION = "kettlebell_app.wsgi.application"
 ASGI_APPLICATION = "kettlebell_app.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
+CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-       'default': {
-           'ENGINE': 'django.db.backends.postgresql',
-           'OPTIONS': {
-               'service': 'kb_app_service',
-               'passfile': '.my_pgpass',
-           },
-       }
-   }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "OPTIONS": {"service": "kb_app_service", "passfile": ".my_pgpass",},
+    }
+}
 
 
 # Password validation
