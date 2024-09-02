@@ -131,6 +131,11 @@ from django.db.models.functions import Greatest
 from .models import Category, Player, SnatchResult, TGUResult, SeeSawPressResult, KBSquatResult
 
 
+from django.shortcuts import render
+from django.db.models import F, ExpressionWrapper, FloatField
+from django.db.models.functions import Greatest
+from .models import Category, Player, SnatchResult, TGUResult, SeeSawPressResult, KBSquatResult
+
 def amator_kobiety_do_65kg(request):
     category = Category.objects.get(name='Amator_Kobiety_do_65kg')
     players = Player.objects.filter(categories=category)
@@ -200,8 +205,7 @@ def amator_kobiety_do_65kg(request):
                 'snatch_kettlebell_weight': result.player.snatch_kettlebell_weight,
                 'snatch_repetitions': result.player.snatch_repetitions,
                 'max_result': result.result,
-                'bw_percentage': round((result.player.snatch_kettlebell_weight / result.player.weight) * 100,
-                                       2) if result.player.weight and result.player.snatch_kettlebell_weight else None
+                'bw_percentage': round((result.player.snatch_kettlebell_weight / result.player.weight) * 100, 2) if result.player.weight and result.player.snatch_kettlebell_weight else None
             } for result in snatch_results
         ],
         'tgu_results': [
@@ -218,12 +222,11 @@ def amator_kobiety_do_65kg(request):
                 'position': result.position,
                 'player': result.player,
                 'weight': result.player.weight,
-                'attempt_1': f"{result.result_left_1}/{result.result_right_1}",
-                'attempt_2': f"{result.result_left_2}/{result.result_right_2}",
-                'attempt_3': f"{result.result_left_3}/{result.result_right_3}",
+                'attempt_1': f"{result.result_left_1:.1f}/{result.result_right_1:.1f}",
+                'attempt_2': f"{result.result_left_2:.1f}/{result.result_right_2:.1f}",
+                'attempt_3': f"{result.result_left_3:.1f}/{result.result_right_3:.1f}",
                 'max_result': result.get_max_result(),
-                'bw_percentage': round((result.get_max_result() / result.player.weight) * 100,
-                                       2) if result.player.weight and result.get_max_result() else None
+                'bw_percentage': round((result.get_max_result() / result.player.weight) * 100, 1) if result.player.weight else None
             } for result in see_saw_results
         ],
         'kb_squat_results': [

@@ -184,9 +184,9 @@ class SeeSawPressResult(models.Model):
 
     def get_max_result(self):
         return max(
-            self.get_attempt_result(1),
-            self.get_attempt_result(2),
-            self.get_attempt_result(3),
+            (self.result_left_1 + self.result_right_1),
+            (self.result_left_2 + self.result_right_2),
+            (self.result_left_3 + self.result_right_3)
         )
 
 
