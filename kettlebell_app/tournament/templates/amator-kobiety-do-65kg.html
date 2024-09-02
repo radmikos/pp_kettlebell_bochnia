@@ -185,6 +185,8 @@
 
 <h2>Wyniki KB Squat</h2>
 
+<h2>Wyniki KB Squat</h2>
+
 <table>
     <thead>
         <tr>
@@ -193,7 +195,10 @@
             <th>Imię</th>
             <th>Klub</th>
             <th>Waga ciała</th>
-            <th>Wynik</th>
+            <th>Próba I (L/P)</th>
+            <th>Próba II (L/P)</th>
+            <th>Próba III (L/P)</th>
+            <th>Wynik Max</th>
             <th>%BW</th>
         </tr>
     </thead>
@@ -204,9 +209,13 @@
             <td>{{ result.player.surname }}</td>
             <td>{{ result.player.name }}</td>
             <td>{{ result.player.club.name }}</td>
-            <td>{{ result.weight }}</td>
+            <td>{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
             <td>{{ result.attempt_1 }}</td>
-            <td>{{ result.bw_percentage }}</td>
+            <td>{{ result.attempt_2 }}</td>
+            <td>{{ result.attempt_3 }}</td>
+
+            <td>{{ result.max_result|floatformat:1 }}</td>
+            <td>{{ result.bw_percentage|default_if_none:"-"|floatformat:1 }}</td>
         </tr>
         {% endfor %}
     </tbody>

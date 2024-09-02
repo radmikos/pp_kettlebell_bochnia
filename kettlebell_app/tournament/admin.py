@@ -3,6 +3,7 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import (
     BestSeeSawPressResult,
+    BestKBSquatResult,
     Category,
     KBSquatResult,
     OverallResult,
@@ -29,7 +30,7 @@ class PlayerAdmin(ImportExportModelAdmin):
         "tgu_weight",
         "get_best_see_saw_press_left",
         "get_best_see_saw_press_right",
-        "kb_squat_weight",
+        "get_best_kb_squat",
         "tiebreak",
     )
     list_filter = ("club", "categories", "tiebreak")
@@ -52,7 +53,16 @@ class PlayerAdmin(ImportExportModelAdmin):
                 )
             },
         ),
-        ("KB Squat", {"fields": ("kb_squat_weight",)}),
+        (
+            "KB Squat",
+            {
+                "fields": (
+                    ("kb_squat_weight_left_1", "kb_squat_weight_right_1"),
+                    ("kb_squat_weight_left_2", "kb_squat_weight_right_2"),
+                    ("kb_squat_weight_left_3", "kb_squat_weight_right_3"),
+                )
+            },
+        ),
     )
 
     def get_categories(self, obj):
@@ -71,6 +81,12 @@ class PlayerAdmin(ImportExportModelAdmin):
         return best_result.best_right if best_result else 0
 
     get_best_see_saw_press_right.short_description = "See Saw Press Right (Best)"
+
+    def get_best_kb_squat(self, obj):
+        best_result = BestKBSquatResult.objects.filter(player=obj).first()
+        return best_result.best_result if best_result else 0
+
+    get_best_kb_squat.short_description = "KB Squat (Best)"
 
     def get_import_resource_class(self):
         return PlayerImportResource
@@ -115,7 +131,30 @@ class SeeSawPressResultAdmin(admin.ModelAdmin):
 
 @admin.register(KBSquatResult)
 class KBSquatResultAdmin(admin.ModelAdmin):
-    list_display = ("player", "result", "position")
+    list_display = (
+        "player",
+        "get_max_result",
+        "get_result_1",
+        "get_result_2",
+        "get_result_3",
+        "position",
+    )
+
+    def get_max_result(self, obj):
+        return obj.get_max_result()
+    get_max_result.short_description = "Max Result"
+
+    def get_result_1(self, obj):
+        return f"L: {obj.result_left_1}, R: {obj.result_right_1}"
+    get_result_1.short_description = "Result 1"
+
+    def get_result_2(self, obj):
+        return f"L: {obj.result_left_2}, R: {obj.result_right_2}"
+    get_result_2.short_description = "Result 2"
+
+    def get_result_3(self, obj):
+        return f"L: {obj.result_left_3}, R: {obj.result_right_3}"
+    get_result_3.short_description = "Result 3"
 
 
 @admin.register(OverallResult)
@@ -135,3 +174,8 @@ class OverallResultAdmin(admin.ModelAdmin):
 @admin.register(BestSeeSawPressResult)
 class BestSeeSawPressResultAdmin(admin.ModelAdmin):
     list_display = ("player", "best_left", "best_right")
+
+
+@admin.register(BestKBSquatResult)
+class BestKBSquatResultAdmin(admin.ModelAdmin):
+    list_display = ("player", "best_result")
