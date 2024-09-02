@@ -27,7 +27,7 @@ class PlayerAdmin(ImportExportModelAdmin):
         "get_categories",
         "snatch_kettlebell_weight",
         "snatch_repetitions",
-        "tgu_weight",
+        "get_tgu_max",
         "get_best_see_saw_press_left",
         "get_best_see_saw_press_right",
         "get_best_kb_squat",
@@ -42,7 +42,7 @@ class PlayerAdmin(ImportExportModelAdmin):
             {"fields": ("name", "surname", "weight", "club", "categories", "tiebreak")},
         ),
         ("Snatch", {"fields": ("snatch_kettlebell_weight", "snatch_repetitions")}),
-        ("TGU", {"fields": ("tgu_weight",)}),
+        ("TGU", {"fields": ("tgu_weight_1", "tgu_weight_2", "tgu_weight_3")}),
         (
             "See Saw Press",
             {
@@ -70,6 +70,11 @@ class PlayerAdmin(ImportExportModelAdmin):
 
     get_categories.short_description = "Kategoria"
 
+    def get_tgu_max(self, obj):
+        return max(obj.tgu_weight_1 or 0, obj.tgu_weight_2 or 0, obj.tgu_weight_3 or 0)
+
+    get_tgu_max.short_description = "TGU Max"
+
     def get_best_see_saw_press_left(self, obj):
         best_result = BestSeeSawPressResult.objects.filter(player=obj).first()
         return best_result.best_left if best_result else 0
@@ -94,25 +99,42 @@ class PlayerAdmin(ImportExportModelAdmin):
     def get_export_resource_class(self):
         return PlayerExportResource
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+        # Update or create TGUResult
+        tgu_result, created = TGUResult.objects.get_or_create(player=obj)
+        tgu_result.result_1 = obj.tgu_weight_1 or 0
+        tgu_result.result_2 = obj.tgu_weight_2 or 0
+        tgu_result.result_3 = obj.tgu_weight_3 or 0
+        tgu_result.save()
+
 
 @admin.register(SportClub)
 class SportClubAdmin(admin.ModelAdmin):
     list_display = ("name",)
 
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ("name",)
-
 
 @admin.register(SnatchResult)
 class SnatchResultAdmin(admin.ModelAdmin):
     list_display = ("player", "result", "position")
 
-
 @admin.register(TGUResult)
 class TGUResultAdmin(admin.ModelAdmin):
-    list_display = ("player", "result", "position")
+    list_display = ('player', 'result_1', 'result_2', 'result_3', 'get_max_result', 'get_bw_percentage', 'position')
+    list_filter = ('player__categories',)
+    search_fields = ('player__name', 'player__surname')
+
+    def get_max_result(self, obj):
+        return obj.get_max_result()
+    get_max_result.short_description = 'Max Result'
+
+    def get_bw_percentage(self, obj):
+        return f"{obj.calculate_bw_percentage():.2f}%"
+    get_bw_percentage.short_description = '%BW'
 
 
 @admin.register(SeeSawPressResult)

@@ -150,6 +150,18 @@ from .models import (
     KBSquatResult,
 )
 
+from django.shortcuts import render
+from django.db.models import F, ExpressionWrapper, FloatField
+from django.db.models.functions import Greatest
+from .models import (
+    Category,
+    Player,
+    SnatchResult,
+    TGUResult,
+    SeeSawPressResult,
+    KBSquatResult,
+)
+
 
 def amator_kobiety_do_65kg(request):
     category = Category.objects.get(name="Amator_Kobiety_do_65kg")
@@ -163,7 +175,10 @@ def amator_kobiety_do_65kg(request):
         result.save()
 
     # Calculate positions for TGU
-    tgu_results = TGUResult.objects.filter(player__in=players).order_by("-result")
+    tgu_results = TGUResult.objects.filter(player__in=players).annotate(
+        max_result=Greatest('result_1', 'result_2', 'result_3')
+    ).order_by('-max_result')
+
     for position, result in enumerate(tgu_results, 1):
         result.position = position
         result.save()
@@ -196,10 +211,10 @@ def amator_kobiety_do_65kg(request):
                                    1) if player.weight and kb_squat_result.pk else 0,
         })
 
-    # Sortowanie wyników KB Squat
+    # Sorting KB Squat results
     kb_squat_results.sort(key=lambda x: x['max_result'], reverse=True)
 
-    # Przypisanie pozycji
+    # Assigning positions for KB Squat
     for index, result in enumerate(kb_squat_results, start=1):
         result['position'] = index
 
@@ -270,8 +285,11 @@ def amator_kobiety_do_65kg(request):
                 "position": result.position,
                 "player": result.player,
                 "weight": result.player.weight,
-                "max_result": result.result,
-                "bw_percentage": round(result.result, 2),
+                "attempt_1": result.result_1,
+                "attempt_2": result.result_2,
+                "attempt_3": result.result_3,
+                "max_result": result.get_max_result(),
+                "bw_percentage": round(result.calculate_bw_percentage(), 2),
             }
             for result in tgu_results
         ],
@@ -294,6 +312,8 @@ def amator_kobiety_do_65kg(request):
         ],
         "kb_squat_results": kb_squat_results,
     }
+
+    return render(request, "amator-kobiety-do-65kg.html", context)
 
     return render(request, "amator-kobiety-do-65kg.html", context)
 def amator_kobiety_powyzej_65kg(request):

@@ -26,7 +26,9 @@ class Player(models.Model):
     snatch_kettlebell_weight = models.FloatField(null=True, blank=True)
     snatch_repetitions = models.IntegerField(null=True, blank=True)
 
-    tgu_weight = models.FloatField(null=True, blank=True)
+    tgu_weight_1 = models.FloatField(null=True, blank=True)
+    tgu_weight_2 = models.FloatField(null=True, blank=True)
+    tgu_weight_3 = models.FloatField(null=True, blank=True)
 
     see_saw_press_weight_left_1 = models.FloatField(null=True, blank=True, default=0)
     see_saw_press_weight_left_2 = models.FloatField(null=True, blank=True, default=0)
@@ -72,7 +74,9 @@ class Player(models.Model):
 
     def _update_tgu_result(self):
         tgu_result, _ = TGUResult.objects.get_or_create(player=self)
-        tgu_result.result = round(self.tgu_body_percent_weight() or 0, 1)
+        tgu_result.result_1 = self.tgu_weight_1 or 0
+        tgu_result.result_2 = self.tgu_weight_2 or 0
+        tgu_result.result_3 = self.tgu_weight_3 or 0
         tgu_result.save()
 
     def _update_see_saw_press_result(self):
@@ -164,10 +168,18 @@ class Player(models.Model):
         return None
 
     def tgu_body_percent_weight(self):
-        return (
-            (self.tgu_weight / self.weight) if self.tgu_weight and self.weight else None
+        max_tgu_weight = max(
+            self.tgu_weight_1 or 0,
+            self.tgu_weight_2 or 0,
+            self.tgu_weight_3 or 0
         )
-
+        return (max_tgu_weight / self.weight) * 100 if max_tgu_weight and self.weight else None
+    def get_max_tgu_weight(self):
+        return max(
+            self.tgu_weight_1 or 0,
+            self.tgu_weight_2 or 0,
+            self.tgu_weight_3 or 0
+        )
     def see_saw_press_body_percent_weight_left(self, attempt):
         weight = getattr(self, f"see_saw_press_weight_left_{attempt}")
         return (((weight * 3) / self.weight) * 100) if weight and self.weight else None
@@ -190,13 +202,22 @@ class SnatchResult(models.Model):
 
 class TGUResult(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    result = models.FloatField(null=True, blank=True)  # Zezwalamy na wartości null
+    result_1 = models.FloatField(default=0)
+    result_2 = models.FloatField(default=0)
+    result_3 = models.FloatField(default=0)
     position = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return (
-            f"{self.player} - TGU: {self.result if self.result is not None else 'N/A'}"
-        )
+        return f"{self.player} - TGU Results"
+
+    def get_max_result(self):
+        return max(self.result_1 or 0, self.result_2 or 0, self.result_3 or 0)
+
+    def calculate_bw_percentage(self):
+        if self.player.weight:
+            max_result = self.get_max_result()
+            return (max_result / self.player.weight) * 100
+        return 0
 
 
 class SeeSawPressResult(models.Model):
