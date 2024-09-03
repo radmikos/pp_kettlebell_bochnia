@@ -50,20 +50,17 @@ def calculate_positions(result_model, category):
 
 
 def update_overall_results(category):
+    disciplines = category.get_disciplines()
     for player in Player.objects.filter(categories=category):
         overall, created = OverallResult.objects.get_or_create(player=player)
 
-        snatch_results = SnatchResult.objects.filter(player=player).first()
-        overall.snatch_points = snatch_results.position if snatch_results else 0
+        if 'snatch' in disciplines:
+            snatch_results = SnatchResult.objects.filter(player=player).first()
+            overall.snatch_points = snatch_results.position if snatch_results else 0
+        else:
+            overall.snatch_points = 0
 
-        tgu_result = TGUResult.objects.filter(player=player).first()
-        overall.tgu_points = tgu_result.position if tgu_result else 0
-
-        see_saw_result = SeeSawPressResult.objects.filter(player=player).first()
-        overall.see_saw_press_points = see_saw_result.position if see_saw_result else 0
-
-        kb_squat_result = KBSquatResult.objects.filter(player=player).first()
-        overall.kb_squat_points = kb_squat_result.position if kb_squat_result else 0
+        # Powtórz dla pozostałych dyscyplin
 
         overall.calculate_total_points()
         overall.save()
@@ -176,219 +173,133 @@ from .models import (
     PistolSquatResult,
     OverallResult,
 )
-
-
-def amator_kobiety_do_65kg(request):
-    category = Category.objects.get(name="Amator_Kobiety_do_65kg")
+def calculate_category_results(request, category_name, template_name):
+    category = Category.objects.get(name=category_name)
     players = Player.objects.filter(categories=category)
+    disciplines = category.get_disciplines()
 
-    # Calculate positions for Snatch
-    snatch_results = list(SnatchResult.objects.filter(player__in=players))
-    snatch_results.sort(key=lambda x: x.result or 0, reverse=True)
-    for position, result in enumerate(snatch_results, 1):
-        result.position = position
-        result.save()
-
-    # Calculate positions for TGU
-    tgu_results = (
-        TGUResult.objects.filter(player__in=players)
-        .annotate(max_result=Greatest("result_1", "result_2", "result_3"))
-        .order_by("-max_result")
-    )
-
-    for position, result in enumerate(tgu_results, 1):
-        result.position = position
-        result.save()
-
-    # Calculate positions for See Saw Press
-    see_saw_results = SeeSawPressResult.objects.filter(player__in=players)
-    see_saw_results = sorted(
-        see_saw_results, key=lambda x: x.get_max_result(), reverse=True
-    )
-    for position, result in enumerate(see_saw_results, 1):
-        result.position = position
-        result.save()
-
-    # Calculate positions for KB Squat
-    kb_squat_results = []
-    for player in players:
-        kb_squat_result = KBSquatResult.objects.filter(player=player).first()
-        if not kb_squat_result:
-            kb_squat_result = KBSquatResult(player=player)
-
-        kb_squat_results.append(
-            {
-                "position": kb_squat_result.position if kb_squat_result.position else 0,
-                "player": player,
-                "weight": player.weight,
-                "attempt_1": f"{kb_squat_result.result_left_1:.1f}/{kb_squat_result.result_right_1:.1f}"
-                if kb_squat_result.pk
-                else "0.0/0.0",
-                "attempt_2": f"{kb_squat_result.result_left_2:.1f}/{kb_squat_result.result_right_2:.1f}"
-                if kb_squat_result.pk
-                else "0.0/0.0",
-                "attempt_3": f"{kb_squat_result.result_left_3:.1f}/{kb_squat_result.result_right_3:.1f}"
-                if kb_squat_result.pk
-                else "0.0/0.0",
-                "max_result": kb_squat_result.get_max_result()
-                if kb_squat_result.pk
-                else 0,
-                "bw_percentage": round(
-                    (kb_squat_result.get_max_result() / player.weight) * 100, 1
-                )
-                if player.weight and kb_squat_result.pk
-                else 0,
+    discipline_configs = {
+        'snatch': {
+            'model': SnatchResult,
+            'calculate': lambda player, result: {
+                'max_result': result.result or 0,
+                'bw_percentage': round((player.snatch_kettlebell_weight / player.weight) * 100, 2) if player.weight and player.snatch_kettlebell_weight else 0,
+                'kettlebell_weight': player.snatch_kettlebell_weight,
+                'repetitions': player.snatch_repetitions,
             }
-        )
-
-    # Sorting KB Squat results
-    kb_squat_results.sort(key=lambda x: x["max_result"], reverse=True)
-
-    # Assigning positions for KB Squat
-    for index, result in enumerate(kb_squat_results, start=1):
-        result["position"] = index
-
-    # Calculate positions for Pistol Squat
-    pistol_squat_results = []
-    for player in players:
-        result = PistolSquatResult.objects.filter(player=player).first()
-        if not result:
-            result = PistolSquatResult(player=player)
-
-        pistol_squat_results.append({
-            "position": result.position if result.position else 0,
-            "player": player,
-            "weight": player.weight,
-            "attempt_1": result.result_1 if result.pk else 0,
-            "attempt_2": result.result_2 if result.pk else 0,
-            "attempt_3": result.result_3 if result.pk else 0,
-            "max_result": result.get_max_result() if result.pk else 0,
-            "bw_percentage": round(result.calculate_bw_percentage(), 2) if result.pk else 0,
-        })
-
-    # Sorting Pistol Squat results
-    pistol_squat_results.sort(key=lambda x: x['max_result'], reverse=True)
-
-    # Assigning positions for Pistol Squat
-    for index, result in enumerate(pistol_squat_results, start=1):
-        result['position'] = index
-
-    # Calculate overall results
-    overall_results = []
-    for player in players:
-        snatch_points = (
-                getattr(SnatchResult.objects.filter(player=player).first(), "position", 0)
-                or 0
-        )
-        tgu_points = (
-                getattr(TGUResult.objects.filter(player=player).first(), "position", 0) or 0
-        )
-        see_saw_points = (
-                getattr(
-                    SeeSawPressResult.objects.filter(player=player).first(), "position", 0
-                )
-                or 0
-        )
-        kb_squat_points = next(
-            (r["position"] for r in kb_squat_results if r["player"] == player), 0
-        )
-        pistol_squat_points = next(
-            (r["position"] for r in pistol_squat_results if r["player"] == player), 0
-        )
-
-        total_points = (
-                snatch_points
-                + tgu_points
-                + see_saw_points
-                + kb_squat_points
-                + pistol_squat_points
-        )
-
-        overall_results.append(
-            {
-                "player": player,
-                "weight": player.weight,
-                "snatch_place": snatch_points,
-                "tgu_place": tgu_points,
-                "press_place": see_saw_points,
-                "squat_place": kb_squat_points,
-                "pistol_squat_place": pistol_squat_points,
-                "total_points": total_points,
-                "tiebreak": player.tiebreak,
+        },
+        'tgu': {
+            'model': TGUResult,
+            'calculate': lambda player, result: {
+                'max_result': result.get_max_result(),
+                'bw_percentage': round(result.calculate_bw_percentage(), 2),
+                'attempt_1': result.result_1,
+                'attempt_2': result.result_2,
+                'attempt_3': result.result_3,
             }
-        )
-
-    # Sort overall results
-    overall_results.sort(key=lambda x: x["total_points"])
-
-    # Assign final positions and calculate final scores
-    for position, result in enumerate(overall_results, 1):
-        result["total_place"] = position
-        result["final_score"] = (
-            result["total_points"] - 0.5
-            if result["tiebreak"]
-            else result["total_points"]
-        )
-
-    context = {
-        "category_name": "Amator Kobiety do 65kg",
-        "overall_results": overall_results,
-        "snatch_results": [
-            {
-                "position": result.position,
-                "player": result.player,
-                "weight": result.player.weight,
-                "snatch_kettlebell_weight": result.player.snatch_kettlebell_weight or 0,
-                "snatch_repetitions": result.player.snatch_repetitions or 0,
-                "max_result": result.result or 0,
-                "bw_percentage": round(
-                    (
-                            (result.player.snatch_kettlebell_weight or 0)
-                            / result.player.weight
-                    )
-                    * 100,
-                    2,
-                )
-                if result.player.weight and result.player.snatch_kettlebell_weight
-                else 0,
+        },
+        'see_saw_press': {
+            'model': SeeSawPressResult,
+            'calculate': lambda player, result: {
+                'max_result': result.get_max_result(),
+                'bw_percentage': round((result.get_max_result() / player.weight) * 100, 1) if player.weight else 0,
+                'attempt_1': f"{result.result_left_1:.1f}/{result.result_right_1:.1f}",
+                'attempt_2': f"{result.result_left_2:.1f}/{result.result_right_2:.1f}",
+                'attempt_3': f"{result.result_left_3:.1f}/{result.result_right_3:.1f}",
             }
-            for result in snatch_results
-        ],
-        "tgu_results": [
-            {
-                "position": result.position,
-                "player": result.player,
-                "weight": result.player.weight,
-                "attempt_1": result.result_1,
-                "attempt_2": result.result_2,
-                "attempt_3": result.result_3,
-                "max_result": result.get_max_result(),
-                "bw_percentage": round(result.calculate_bw_percentage(), 2),
+        },
+        'kb_squat': {
+            'model': KBSquatResult,
+            'calculate': lambda player, result: {
+                'max_result': result.get_max_result(),
+                'bw_percentage': round((result.get_max_result() / player.weight) * 100, 1) if player.weight else 0,
+                'attempt_1': f"{result.result_left_1:.1f}/{result.result_right_1:.1f}",
+                'attempt_2': f"{result.result_left_2:.1f}/{result.result_right_2:.1f}",
+                'attempt_3': f"{result.result_left_3:.1f}/{result.result_right_3:.1f}",
             }
-            for result in tgu_results
-        ],
-        "see_saw_results": [
-            {
-                "position": result.position,
-                "player": result.player,
-                "weight": result.player.weight,
-                "attempt_1": f"{result.result_left_1:.1f}/{result.result_right_1:.1f}",
-                "attempt_2": f"{result.result_left_2:.1f}/{result.result_right_2:.1f}",
-                "attempt_3": f"{result.result_left_3:.1f}/{result.result_right_3:.1f}",
-                "max_result": result.get_max_result(),
-                "bw_percentage": round(
-                    (result.get_max_result() / result.player.weight) * 100, 1
-                )
-                if result.player.weight
-                else 0,
+        },
+        'pistols_squat': {
+            'model': PistolSquatResult,
+            'calculate': lambda player, result: {
+                'max_result': result.get_max_result(),
+                'bw_percentage': round(result.calculate_bw_percentage(), 2),
+                'attempt_1': result.result_1,
+                'attempt_2': result.result_2,
+                'attempt_3': result.result_3,
             }
-            for result in see_saw_results
-        ],
-        "kb_squat_results": kb_squat_results,
-        "pistol_squat_results": pistol_squat_results,
+        },
     }
 
-    return render(request, "amator-kobiety-do-65kg.html", context)
+    results = {discipline: [] for discipline in disciplines}
+    overall_results = []
+
+    for player in players:
+        player_results = {'player': player, 'weight': player.weight}
+        total_points = 0
+
+        for discipline in disciplines:
+            config = discipline_configs.get(discipline)
+            if config:
+                result = config['model'].objects.filter(player=player).first()
+                if result:
+                    try:
+                        discipline_result = {
+                            'player': player,
+                            'weight': player.weight,
+                            **config['calculate'](player, result)
+                        }
+                        results[discipline].append(discipline_result)
+                        position = result.position if result.position is not None else 0
+                        player_results[f'{discipline}_place'] = position
+                        total_points += position
+                    except Exception as e:
+                        print(f"Error calculating results for {player} in {discipline}: {e}")
+                        player_results[f'{discipline}_place'] = 0
+                else:
+                    player_results[f'{discipline}_place'] = 0
+            else:
+                player_results[f'{discipline}_place'] = 0
+
+        player_results['total_points'] = total_points
+        player_results['tiebreak'] = player.tiebreak
+        overall_results.append(player_results)
+
+    # Sortowanie i przypisywanie końcowych pozycji
+    overall_results.sort(key=lambda x: x['total_points'])
+    for position, result in enumerate(overall_results, 1):
+        result['total_place'] = position
+        result['final_score'] = result['total_points'] - 0.5 if result['tiebreak'] else result['total_points']
+
+    # Sortowanie wyników poszczególnych dyscyplin
+    for discipline in results:
+        results[discipline].sort(key=lambda x: x['max_result'], reverse=True)
+        for position, result in enumerate(results[discipline], 1):
+            result['position'] = position
+
+    context = {
+        'category_name': category_name,
+        'overall_results': overall_results,
+        'disciplines': disciplines,
+        'snatch_results': results.get('snatch', []),
+        'tgu_results': results.get('tgu', []),
+        'see_saw_results': results.get('see_saw_press', []),
+        'kb_squat_results': results.get('kb_squat', []),
+        'pistol_squat_results': results.get('pistols_squat', []),
+    }
+
+    return render(request, template_name, context)
+
+def amator_kobiety_do_65kg(request):
+    return calculate_category_results(request, "Amator_Kobiety_do_65kg", "amator-kobiety-do-65kg.html")
+
+def amator_kobiety_powyzej_65kg(request):
+    return calculate_category_results(request, "Amator_Kobiety_powyżej_65kg", "amator-kobiety-powyzej-65kg.html")
+
+def amator_mezczyzni_do_85kg(request):
+    return calculate_category_results(request, "Amator_Mężczyźni_do_85kg", "amator-mezczyzni-do-85kg.html")
+
+
+
 
 
 def amator_kobiety_powyzej_65kg(request):
@@ -485,13 +396,13 @@ def nagroda_specjalna(request):
     return render(request, "nagroda-specjalna.html", {"results": results})
 
 
-def calculate_category_results(category):
-    players = Player.objects.filter(categories=category)
-    disciplines = category.get_disciplines()
-
-    results = {}
-    for discipline in disciplines:
-        if discipline in globals():
-            results[discipline] = globals()[f"calculate_{discipline}_results"](players)
-        else:
-            print(f"Warning: No calculation function found for discipline {discipline}")
+# def calculate_category_results(category):
+#     players = Player.objects.filter(categories=category)
+#     disciplines = category.get_disciplines()
+#
+#     results = {}
+#     for discipline in disciplines:
+#         if discipline in globals():
+#             results[discipline] = globals()[f"calculate_{discipline}_results"](players)
+#         else:
+#             print(f"Warning: No calculation function found for discipline {discipline}")

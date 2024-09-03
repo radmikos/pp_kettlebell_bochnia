@@ -84,9 +84,20 @@ class Player(models.Model):
         finally:
             self._updating_results = False
 
-    def kb_squat_body_percent_weight(self, side, attempt):
-        weight = getattr(self, f"kb_squat_weight_{side}_{attempt}")
-        return weight
+    def _update_overall_result(self):
+        overall_result, created = OverallResult.objects.get_or_create(player=self)
+
+        for discipline, _ in AVAILABLE_DISCIPLINES:
+            points = 0
+            for category in self.categories.all():
+                if discipline in category.get_disciplines():
+                    result = getattr(self, f"{discipline}result_set").first()
+                    if result:
+                        points += result.position if result.position else 0
+            setattr(overall_result, f"{discipline}_points", points)
+
+        overall_result.calculate_total_points()
+        overall_result.save()
 
     def _update_snatch_result(self):
         snatch_result, _ = SnatchResult.objects.get_or_create(player=self)
@@ -145,38 +156,38 @@ class Player(models.Model):
         )
         best_see_saw_result.update_best_results()
 
-    def _update_overall_result(self):
-        overall_result, created = OverallResult.objects.get_or_create(player=self)
-
-        # Snatch
-        snatch_result = self.snatchresult_set.first()
-        overall_result.snatch_points = snatch_result.position if snatch_result else 0
-
-        # TGU
-        tgu_result = self.tguresult_set.first()
-        overall_result.tgu_points = tgu_result.position if tgu_result else 0
-
-        # See Saw Press
-        see_saw_result = self.seesawpressresult_set.first()
-        overall_result.see_saw_press_points = (
-            see_saw_result.position if see_saw_result else 0
-        )
-
-        # KB Squat
-        kb_squat_result = self.kbsquatresult_set.first()
-        overall_result.kb_squat_points = (
-            kb_squat_result.position if kb_squat_result else 0
-        )
-
-        # Pistols Squat
-        pistol_squat_result = self.pistolsquatresult_set.first()
-        overall_result.pistol_squat_points = (
-            pistol_squat_result.position if pistol_squat_result else 0
-        )
-
-        # Calculate total points
-        overall_result.calculate_total_points()
-        overall_result.save()
+    # def _update_overall_result(self):
+    #     overall_result, created = OverallResult.objects.get_or_create(player=self)
+    #
+    #     # Snatch
+    #     snatch_result = self.snatchresult_set.first()
+    #     overall_result.snatch_points = snatch_result.position if snatch_result else 0
+    #
+    #     # TGU
+    #     tgu_result = self.tguresult_set.first()
+    #     overall_result.tgu_points = tgu_result.position if tgu_result else 0
+    #
+    #     # See Saw Press
+    #     see_saw_result = self.seesawpressresult_set.first()
+    #     overall_result.see_saw_press_points = (
+    #         see_saw_result.position if see_saw_result else 0
+    #     )
+    #
+    #     # KB Squat
+    #     kb_squat_result = self.kbsquatresult_set.first()
+    #     overall_result.kb_squat_points = (
+    #         kb_squat_result.position if kb_squat_result else 0
+    #     )
+    #
+    #     # Pistols Squat
+    #     pistol_squat_result = self.pistolsquatresult_set.first()
+    #     overall_result.pistol_squat_points = (
+    #         pistol_squat_result.position if pistol_squat_result else 0
+    #     )
+    #
+    #     # Calculate total points
+    #     overall_result.calculate_total_points()
+    #     overall_result.save()
 
     def get_max_pistol_squat_weight(self):
         return max(
@@ -380,15 +391,12 @@ class OverallResult(models.Model):
     final_position = models.IntegerField(null=True, blank=True)
 
     def calculate_total_points(self):
-        self.total_points = round(
-            (self.snatch_points or 0)
-            + (self.tgu_points or 0)
-            + (self.see_saw_press_points or 0)
-            + (self.kb_squat_points or 0)
-            + (self.pistol_squat_points or 0)
-            - (0.5 if self.player.tiebreak else 0),
-            1,
-        )
+        category_disciplines = self.player.categories.first().get_disciplines()
+        self.total_points = sum([
+            getattr(self, f"{discipline}_points")
+            for discipline in ['snatch', 'tgu', 'see_saw_press', 'kb_squat', 'pistols_squat']
+            if discipline in category_disciplines
+        ]) - (0.5 if self.player.tiebreak else 0)
         self.tiebreak_points = -0.5 if self.player.tiebreak else 0
 
         # Upewniamy się, że żadne pole nie jest None
