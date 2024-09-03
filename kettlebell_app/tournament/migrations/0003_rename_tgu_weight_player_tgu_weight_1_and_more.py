@@ -11,9 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="player",
-            old_name="tgu_weight",
-            new_name="tgu_weight_1",
+            model_name="player", old_name="tgu_weight", new_name="tgu_weight_1",
         ),
         migrations.AddField(
             model_name="player",

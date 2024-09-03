@@ -13,6 +13,7 @@ from .models import (
     SnatchResult,
     SportClub,
     TGUResult,
+    PistolSquatResult,
 )
 from .resources import PlayerExportResource, PlayerImportResource
 from django import forms
@@ -22,26 +23,27 @@ from django import forms
 from django.contrib import admin
 from .models import Category, AVAILABLE_DISCIPLINES
 
+
 class CategoryAdminForm(forms.ModelForm):
     disciplines = forms.MultipleChoiceField(
         choices=AVAILABLE_DISCIPLINES,
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        label="Konkurencje"
+        label="Konkurencje",
     )
 
     class Meta:
         model = Category
-        fields = ['name', 'disciplines']
+        fields = ["name", "disciplines"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
-            self.fields['disciplines'].initial = self.instance.get_disciplines()
+            self.fields["disciplines"].initial = self.instance.get_disciplines()
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        instance.set_disciplines(self.cleaned_data['disciplines'])
+        instance.set_disciplines(self.cleaned_data["disciplines"])
         if commit:
             instance.save()
         return instance
@@ -94,6 +96,16 @@ class PlayerAdmin(ImportExportModelAdmin):
                 )
             },
         ),
+        (
+            "Pistol Squat",
+            {
+                "fields": (
+                    "pistol_squat_weight_1",
+                    "pistol_squat_weight_2",
+                    "pistol_squat_weight_3",
+                )
+            },
+        ),
     )
 
     def get_categories(self, obj):
@@ -140,6 +152,14 @@ class PlayerAdmin(ImportExportModelAdmin):
         tgu_result.result_3 = obj.tgu_weight_3 or 0
         tgu_result.save()
 
+        pistol_squat_result, created = PistolSquatResult.objects.get_or_create(
+            player=obj
+        )
+        pistol_squat_result.result_1 = obj.pistol_squat_weight_1 or 0
+        pistol_squat_result.result_2 = obj.pistol_squat_weight_2 or 0
+        pistol_squat_result.result_3 = obj.pistol_squat_weight_3 or 0
+        pistol_squat_result.save()
+
 
 @admin.register(SportClub)
 class SportClubAdmin(admin.ModelAdmin):
@@ -156,26 +176,63 @@ class CategoryAdmin(admin.ModelAdmin):
 
     get_disciplines_display.short_description = "Konkurencje"
 
+
 @admin.register(SnatchResult)
 class SnatchResultAdmin(admin.ModelAdmin):
     list_display = ("player", "result", "position")
 
 
-@admin.register(TGUResult)
-class TGUResultAdmin(admin.ModelAdmin):
-    list_display = ('player', 'result_1', 'result_2', 'result_3', 'get_max_result', 'get_bw_percentage', 'position')
-    list_filter = ('player__categories',)
-    search_fields = ('player__name', 'player__surname')
+from .models import PistolSquatResult
+
+
+@admin.register(PistolSquatResult)
+class PistolSquatResultAdmin(admin.ModelAdmin):
+    list_display = (
+        "player",
+        "result_1",
+        "result_2",
+        "result_3",
+        "get_max_result",
+        "get_bw_percentage",
+        "position",
+    )
+    list_filter = ("player__categories",)
+    search_fields = ("player__name", "player__surname")
 
     def get_max_result(self, obj):
         return obj.get_max_result()
 
-    get_max_result.short_description = 'Max Result'
+    get_max_result.short_description = "Max Result"
 
     def get_bw_percentage(self, obj):
         return f"{obj.calculate_bw_percentage():.2f}%"
 
-    get_bw_percentage.short_description = '%BW'
+    get_bw_percentage.short_description = "%BW"
+
+
+@admin.register(TGUResult)
+class TGUResultAdmin(admin.ModelAdmin):
+    list_display = (
+        "player",
+        "result_1",
+        "result_2",
+        "result_3",
+        "get_max_result",
+        "get_bw_percentage",
+        "position",
+    )
+    list_filter = ("player__categories",)
+    search_fields = ("player__name", "player__surname")
+
+    def get_max_result(self, obj):
+        return obj.get_max_result()
+
+    get_max_result.short_description = "Max Result"
+
+    def get_bw_percentage(self, obj):
+        return f"{obj.calculate_bw_percentage():.2f}%"
+
+    get_bw_percentage.short_description = "%BW"
 
 
 @admin.register(SeeSawPressResult)
@@ -232,6 +289,7 @@ class OverallResultAdmin(admin.ModelAdmin):
         "tgu_points",
         "see_saw_press_points",
         "kb_squat_points",
+        "pistol_squat_points",
         "tiebreak_points",
         "total_points",
         "final_position",

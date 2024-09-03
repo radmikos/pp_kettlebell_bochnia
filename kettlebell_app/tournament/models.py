@@ -1,12 +1,14 @@
 from django.db import models
 from django.db.models import Max, Sum
+
 AVAILABLE_DISCIPLINES = [
-    ('snatch', 'Snatch'),
-    ('tgu', 'Turkish Get-Up'),
-    ('see_saw_press', 'See Saw Press'),
-    ('kb_squat', 'Kettlebell Squat'),
-    ('pistols_squat', 'Pistols Squat'),
+    ("snatch", "Snatch"),
+    ("tgu", "Turkish Get-Up"),
+    ("see_saw_press", "See Saw Press"),
+    ("kb_squat", "Kettlebell Squat"),
+    ("pistols_squat", "Pistols Squat"),
 ]
+
 
 class SportClub(models.Model):
     name = models.CharField(max_length=100)
@@ -38,12 +40,12 @@ class Player(models.Model):
     club = models.ForeignKey(SportClub, on_delete=models.CASCADE)
     categories = models.ManyToManyField(Category)
 
-    snatch_kettlebell_weight = models.FloatField(null=True, blank=True)
-    snatch_repetitions = models.IntegerField(null=True, blank=True)
+    snatch_kettlebell_weight = models.FloatField(null=True, blank=True, default=0)
+    snatch_repetitions = models.IntegerField(null=True, blank=True, default=0)
 
-    tgu_weight_1 = models.FloatField(null=True, blank=True)
-    tgu_weight_2 = models.FloatField(null=True, blank=True)
-    tgu_weight_3 = models.FloatField(null=True, blank=True)
+    tgu_weight_1 = models.FloatField(null=True, blank=True, default=0)
+    tgu_weight_2 = models.FloatField(null=True, blank=True, default=0)
+    tgu_weight_3 = models.FloatField(null=True, blank=True, default=0)
 
     see_saw_press_weight_left_1 = models.FloatField(null=True, blank=True, default=0)
     see_saw_press_weight_left_2 = models.FloatField(null=True, blank=True, default=0)
@@ -59,6 +61,9 @@ class Player(models.Model):
     kb_squat_weight_right_2 = models.FloatField(null=True, blank=True, default=0)
     kb_squat_weight_right_3 = models.FloatField(null=True, blank=True, default=0)
 
+    pistol_squat_weight_1 = models.FloatField(null=True, blank=True, default=0)
+    pistol_squat_weight_2 = models.FloatField(null=True, blank=True, default=0)
+    pistol_squat_weight_3 = models.FloatField(null=True, blank=True, default=0)
     tiebreak = models.BooleanField(default=False)
 
     _updating_results = False
@@ -74,6 +79,7 @@ class Player(models.Model):
             self._update_kb_squat_result()
             self._update_best_kb_squat_result()
             self._update_best_see_saw_press_result()
+            self._update_pistol_squat_result()
             self._update_overall_result()
         finally:
             self._updating_results = False
@@ -93,6 +99,13 @@ class Player(models.Model):
         tgu_result.result_2 = self.tgu_weight_2 or 0
         tgu_result.result_3 = self.tgu_weight_3 or 0
         tgu_result.save()
+
+    def _update_pistol_squat_result(self):
+        pistol_squat_result, _ = PistolSquatResult.objects.get_or_create(player=self)
+        pistol_squat_result.result_1 = self.pistol_squat_weight_1 or 0
+        pistol_squat_result.result_2 = self.pistol_squat_weight_2 or 0
+        pistol_squat_result.result_3 = self.pistol_squat_weight_3 or 0
+        pistol_squat_result.save()
 
     def _update_see_saw_press_result(self):
         see_saw_result, _ = SeeSawPressResult.objects.get_or_create(player=self)
@@ -118,7 +131,7 @@ class Player(models.Model):
                 setattr(
                     kb_squat_result,
                     f"result_{side}_{attempt}",
-                    self.kb_squat_body_percent_weight(side, attempt)
+                    self.kb_squat_body_percent_weight(side, attempt),
                 )
         kb_squat_result.save()
 
@@ -133,7 +146,7 @@ class Player(models.Model):
         best_see_saw_result.update_best_results()
 
     def _update_overall_result(self):
-        overall_result, _ = OverallResult.objects.get_or_create(player=self)
+        overall_result, created = OverallResult.objects.get_or_create(player=self)
 
         # Snatch
         snatch_result = self.snatchresult_set.first()
@@ -145,29 +158,32 @@ class Player(models.Model):
 
         # See Saw Press
         see_saw_result = self.seesawpressresult_set.first()
-        overall_result.see_saw_press_points = see_saw_result.position if see_saw_result else 0
+        overall_result.see_saw_press_points = (
+            see_saw_result.position if see_saw_result else 0
+        )
 
         # KB Squat
         kb_squat_result = self.kbsquatresult_set.first()
-        overall_result.kb_squat_points = kb_squat_result.position if kb_squat_result else 0
-
-        # Calculate total points
-        overall_result.total_points = (
-                overall_result.snatch_points +
-                overall_result.tgu_points +
-                overall_result.see_saw_press_points +
-                overall_result.kb_squat_points
+        overall_result.kb_squat_points = (
+            kb_squat_result.position if kb_squat_result else 0
         )
 
-        # Apply tiebreak if needed
-        if self.tiebreak:
-            overall_result.tiebreak_points = -0.5
-            overall_result.total_points -= 0.5
-        else:
-            overall_result.tiebreak_points = 0
+        # Pistols Squat
+        pistol_squat_result = self.pistolsquatresult_set.first()
+        overall_result.pistol_squat_points = (
+            pistol_squat_result.position if pistol_squat_result else 0
+        )
 
+        # Calculate total points
+        overall_result.calculate_total_points()
         overall_result.save()
-        overall_result.save()
+
+    def get_max_pistol_squat_weight(self):
+        return max(
+            self.pistol_squat_weight_1 or 0,
+            self.pistol_squat_weight_2 or 0,
+            self.pistol_squat_weight_3 or 0,
+        )
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -184,17 +200,19 @@ class Player(models.Model):
 
     def tgu_body_percent_weight(self):
         max_tgu_weight = max(
-            self.tgu_weight_1 or 0,
-            self.tgu_weight_2 or 0,
-            self.tgu_weight_3 or 0
+            self.tgu_weight_1 or 0, self.tgu_weight_2 or 0, self.tgu_weight_3 or 0
         )
-        return (max_tgu_weight / self.weight) * 100 if max_tgu_weight and self.weight else None
+        return (
+            (max_tgu_weight / self.weight) * 100
+            if max_tgu_weight and self.weight
+            else None
+        )
+
     def get_max_tgu_weight(self):
         return max(
-            self.tgu_weight_1 or 0,
-            self.tgu_weight_2 or 0,
-            self.tgu_weight_3 or 0
+            self.tgu_weight_1 or 0, self.tgu_weight_2 or 0, self.tgu_weight_3 or 0
         )
+
     def see_saw_press_body_percent_weight_left(self, attempt):
         weight = getattr(self, f"see_saw_press_weight_left_{attempt}")
         return (((weight * 3) / self.weight) * 100) if weight and self.weight else None
@@ -202,8 +220,6 @@ class Player(models.Model):
     def see_saw_press_body_percent_weight_right(self, attempt):
         weight = getattr(self, f"see_saw_press_weight_right_{attempt}")
         return (((weight * 3) / self.weight) * 100) if weight and self.weight else None
-
-
 
 
 class SnatchResult(models.Model):
@@ -224,6 +240,26 @@ class TGUResult(models.Model):
 
     def __str__(self):
         return f"{self.player} - TGU Results"
+
+    def get_max_result(self):
+        return max(self.result_1 or 0, self.result_2 or 0, self.result_3 or 0)
+
+    def calculate_bw_percentage(self):
+        if self.player.weight:
+            max_result = self.get_max_result()
+            return (max_result / self.player.weight) * 100
+        return 0
+
+
+class PistolSquatResult(models.Model):
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    result_1 = models.FloatField(default=0)
+    result_2 = models.FloatField(default=0)
+    result_3 = models.FloatField(default=0)
+    position = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.player} - Pistol Squat Results"
 
     def get_max_result(self):
         return max(self.result_1 or 0, self.result_2 or 0, self.result_3 or 0)
@@ -300,9 +336,15 @@ class KBSquatResult(models.Model):
 
     def get_max_result(self):
         valid_attempts = [
-            self.result_left_1 + self.result_right_1 if self.result_left_1 > 0 and self.result_right_1 > 0 else 0,
-            self.result_left_2 + self.result_right_2 if self.result_left_2 > 0 and self.result_right_2 > 0 else 0,
-            self.result_left_3 + self.result_right_3 if self.result_left_3 > 0 and self.result_right_3 > 0 else 0
+            self.result_left_1 + self.result_right_1
+            if self.result_left_1 > 0 and self.result_right_1 > 0
+            else 0,
+            self.result_left_2 + self.result_right_2
+            if self.result_left_2 > 0 and self.result_right_2 > 0
+            else 0,
+            self.result_left_3 + self.result_right_3
+            if self.result_left_3 > 0 and self.result_right_3 > 0
+            else 0,
         ]
         return max(valid_attempts)
 
@@ -332,20 +374,29 @@ class OverallResult(models.Model):
     tgu_points = models.FloatField(default=0)
     see_saw_press_points = models.FloatField(default=0)
     kb_squat_points = models.FloatField(default=0)
+    pistol_squat_points = models.FloatField(default=0)
     tiebreak_points = models.FloatField(default=0)
     total_points = models.FloatField(default=0)
     final_position = models.IntegerField(null=True, blank=True)
 
     def calculate_total_points(self):
         self.total_points = round(
-            self.snatch_points
-            + self.tgu_points
-            + self.see_saw_press_points
-            + self.kb_squat_points
+            (self.snatch_points or 0)
+            + (self.tgu_points or 0)
+            + (self.see_saw_press_points or 0)
+            + (self.kb_squat_points or 0)
+            + (self.pistol_squat_points or 0)
             - (0.5 if self.player.tiebreak else 0),
             1,
         )
         self.tiebreak_points = -0.5 if self.player.tiebreak else 0
+
+        # Upewniamy się, że żadne pole nie jest None
+        self.snatch_points = self.snatch_points or 0
+        self.tgu_points = self.tgu_points or 0
+        self.see_saw_press_points = self.see_saw_press_points or 0
+        self.kb_squat_points = self.kb_squat_points or 0
+        self.pistol_squat_points = self.pistol_squat_points or 0
 
     def save(self, *args, **kwargs):
         self.calculate_total_points()

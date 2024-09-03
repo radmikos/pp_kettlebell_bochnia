@@ -16,8 +16,6 @@ class Migration(migrations.Migration):
             field=models.JSONField(default=list),
         ),
         migrations.AlterField(
-            model_name="category",
-            name="name",
-            field=models.CharField(max_length=100),
+            model_name="category", name="name", field=models.CharField(max_length=100),
         ),
     ]

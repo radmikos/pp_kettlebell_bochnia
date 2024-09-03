@@ -10,23 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="tguresult",
-            name="result",
+        migrations.RemoveField(model_name="tguresult", name="result",),
+        migrations.AddField(
+            model_name="tguresult", name="result_1", field=models.FloatField(default=0),
         ),
         migrations.AddField(
-            model_name="tguresult",
-            name="result_1",
-            field=models.FloatField(default=0),
+            model_name="tguresult", name="result_2", field=models.FloatField(default=0),
         ),
         migrations.AddField(
-            model_name="tguresult",
-            name="result_2",
-            field=models.FloatField(default=0),
-        ),
-        migrations.AddField(
-            model_name="tguresult",
-            name="result_3",
-            field=models.FloatField(default=0),
+            model_name="tguresult", name="result_3", field=models.FloatField(default=0),
         ),
     ]
