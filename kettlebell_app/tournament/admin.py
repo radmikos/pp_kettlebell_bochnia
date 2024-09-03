@@ -1,27 +1,12 @@
+from django import forms
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
-from django import forms
 
-from .models import (
-    BestSeeSawPressResult,
-    BestKBSquatResult,
-    Category,
-    KBSquatResult,
-    OverallResult,
-    Player,
-    SeeSawPressResult,
-    SnatchResult,
-    SportClub,
-    TGUResult,
-    PistolSquatResult,
-)
+from .models import (AVAILABLE_DISCIPLINES, BestKBSquatResult,
+                     BestSeeSawPressResult, Category, KBSquatResult,
+                     OverallResult, PistolSquatResult, Player,
+                     SeeSawPressResult, SnatchResult, SportClub, TGUResult)
 from .resources import PlayerExportResource, PlayerImportResource
-from django import forms
-from django.contrib import admin
-from .models import Category, AVAILABLE_DISCIPLINES
-from django import forms
-from django.contrib import admin
-from .models import Category, AVAILABLE_DISCIPLINES
 
 
 class CategoryAdminForm(forms.ModelForm):

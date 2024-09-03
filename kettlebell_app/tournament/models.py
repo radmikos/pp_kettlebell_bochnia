@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Max, Sum
 
 AVAILABLE_DISCIPLINES = [
     ("snatch", "Snatch"),
@@ -392,11 +391,19 @@ class OverallResult(models.Model):
 
     def calculate_total_points(self):
         category_disciplines = self.player.categories.first().get_disciplines()
-        self.total_points = sum([
-            getattr(self, f"{discipline}_points")
-            for discipline in ['snatch', 'tgu', 'see_saw_press', 'kb_squat', 'pistols_squat']
-            if discipline in category_disciplines
-        ]) - (0.5 if self.player.tiebreak else 0)
+        self.total_points = sum(
+            [
+                getattr(self, f"{discipline}_points")
+                for discipline in [
+                    "snatch",
+                    "tgu",
+                    "see_saw_press",
+                    "kb_squat",
+                    "pistols_squat",
+                ]
+                if discipline in category_disciplines
+            ]
+        ) - (0.5 if self.player.tiebreak else 0)
         self.tiebreak_points = -0.5 if self.player.tiebreak else 0
 
         # Upewniamy się, że żadne pole nie jest None

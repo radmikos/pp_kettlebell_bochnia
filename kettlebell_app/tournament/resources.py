@@ -1,7 +1,5 @@
-from django.core.exceptions import (
-    MultipleObjectsReturned,  # Dodane importy
-    ObjectDoesNotExist,
-)
+from django.core.exceptions import MultipleObjectsReturned  # Dodane importy
+from django.core.exceptions import ObjectDoesNotExist
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 
