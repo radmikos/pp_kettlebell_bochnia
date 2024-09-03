@@ -408,3 +408,14 @@ def nagroda_specjalna(request):
         "final_position"
     )
     return render(request, "nagroda-specjalna.html", {"results": results})
+
+def calculate_category_results(category):
+    players = Player.objects.filter(categories=category)
+    disciplines = category.get_disciplines()
+
+    results = {}
+    for discipline in disciplines:
+        if discipline in globals():
+            results[discipline] = globals()[f"calculate_{discipline}_results"](players)
+        else:
+            print(f"Warning: No calculation function found for discipline {discipline}")

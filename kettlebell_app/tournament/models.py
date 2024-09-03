@@ -1,6 +1,12 @@
 from django.db import models
 from django.db.models import Max, Sum
-
+AVAILABLE_DISCIPLINES = [
+    ('snatch', 'Snatch'),
+    ('tgu', 'Turkish Get-Up'),
+    ('see_saw_press', 'See Saw Press'),
+    ('kb_squat', 'Kettlebell Squat'),
+    ('pistols_squat', 'Pistols Squat'),
+]
 
 class SportClub(models.Model):
     name = models.CharField(max_length=100)
@@ -10,10 +16,19 @@ class SportClub(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
+    disciplines = models.JSONField(default=list)
 
     def __str__(self):
         return self.name
+
+    def set_disciplines(self, disciplines):
+        valid_disciplines = [d[0] for d in AVAILABLE_DISCIPLINES]
+        self.disciplines = [d for d in disciplines if d in valid_disciplines]
+        self.save()
+
+    def get_disciplines(self):
+        return self.disciplines
 
 
 class Player(models.Model):

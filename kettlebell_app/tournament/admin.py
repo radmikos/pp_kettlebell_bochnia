@@ -1,5 +1,6 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
+from django import forms
 
 from .models import (
     BestSeeSawPressResult,
@@ -14,6 +15,36 @@ from .models import (
     TGUResult,
 )
 from .resources import PlayerExportResource, PlayerImportResource
+from django import forms
+from django.contrib import admin
+from .models import Category, AVAILABLE_DISCIPLINES
+from django import forms
+from django.contrib import admin
+from .models import Category, AVAILABLE_DISCIPLINES
+
+class CategoryAdminForm(forms.ModelForm):
+    disciplines = forms.MultipleChoiceField(
+        choices=AVAILABLE_DISCIPLINES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Konkurencje"
+    )
+
+    class Meta:
+        model = Category
+        fields = ['name', 'disciplines']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['disciplines'].initial = self.instance.get_disciplines()
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.set_disciplines(self.cleaned_data['disciplines'])
+        if commit:
+            instance.save()
+        return instance
 
 
 @admin.register(Player)
@@ -114,13 +145,21 @@ class PlayerAdmin(ImportExportModelAdmin):
 class SportClubAdmin(admin.ModelAdmin):
     list_display = ("name",)
 
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    form = CategoryAdminForm
+    list_display = ("name", "get_disciplines_display")
+
+    def get_disciplines_display(self, obj):
+        return ", ".join(obj.get_disciplines())
+
+    get_disciplines_display.short_description = "Konkurencje"
 
 @admin.register(SnatchResult)
 class SnatchResultAdmin(admin.ModelAdmin):
     list_display = ("player", "result", "position")
+
 
 @admin.register(TGUResult)
 class TGUResultAdmin(admin.ModelAdmin):
@@ -130,10 +169,12 @@ class TGUResultAdmin(admin.ModelAdmin):
 
     def get_max_result(self, obj):
         return obj.get_max_result()
+
     get_max_result.short_description = 'Max Result'
 
     def get_bw_percentage(self, obj):
         return f"{obj.calculate_bw_percentage():.2f}%"
+
     get_bw_percentage.short_description = '%BW'
 
 
@@ -164,18 +205,22 @@ class KBSquatResultAdmin(admin.ModelAdmin):
 
     def get_max_result(self, obj):
         return obj.get_max_result()
+
     get_max_result.short_description = "Max Result"
 
     def get_result_1(self, obj):
         return f"L: {obj.result_left_1}, R: {obj.result_right_1}"
+
     get_result_1.short_description = "Result 1"
 
     def get_result_2(self, obj):
         return f"L: {obj.result_left_2}, R: {obj.result_right_2}"
+
     get_result_2.short_description = "Result 2"
 
     def get_result_3(self, obj):
         return f"L: {obj.result_left_3}, R: {obj.result_right_3}"
+
     get_result_3.short_description = "Result 3"
 
 
