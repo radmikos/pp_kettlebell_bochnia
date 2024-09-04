@@ -78,6 +78,11 @@ class PlayerImportResource(resources.ModelResource):
         model = Player
 
 
+from import_export import fields, resources
+from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
+from .models import Player, SportClub, Category, OverallResult
+
+
 class PlayerExportResource(resources.ModelResource):
     club = fields.Field(
         column_name="Klub", attribute="club", widget=ForeignKeyWidget(SportClub, "name")
@@ -90,9 +95,15 @@ class PlayerExportResource(resources.ModelResource):
     snatch_results = fields.Field(
         column_name="Wyniki Rwania", attribute="snatch_results"
     )
+    snatch_position = fields.Field(
+        column_name="Miejsce Rwanie", attribute="snatch_position"
+    )
+
     tgu_body_percent = fields.Field(
         column_name="TGU % Wagi Ciała", attribute="tgu_body_percent_weight"
     )
+    tgu_position = fields.Field(column_name="Miejsce TGU", attribute="tgu_position")
+
     see_saw_press_body_percent_left = fields.Field(
         column_name="See Saw Press % Wagi Ciała (lewa)",
         attribute="see_saw_press_body_percent_weight_left",
@@ -101,8 +112,32 @@ class PlayerExportResource(resources.ModelResource):
         column_name="See Saw Press % Wagi Ciała (prawa)",
         attribute="see_saw_press_body_percent_weight_right",
     )
+    see_saw_press_position = fields.Field(
+        column_name="Miejsce See Saw Press", attribute="see_saw_press_position"
+    )
+
     kb_squat_body_percent = fields.Field(
         column_name="KB Squat % Wagi Ciała", attribute="kb_squat_body_percent_weight"
+    )
+    kb_squat_position = fields.Field(
+        column_name="Miejsce KB Squat", attribute="kb_squat_position"
+    )
+
+    pistol_squat_weight = fields.Field(
+        column_name="Pistol Squat Waga", attribute="pistol_squat_weight"
+    )
+    pistol_squat_body_percent = fields.Field(
+        column_name="Pistol Squat % Wagi Ciała", attribute="pistol_squat_body_percent"
+    )
+    pistol_squat_position = fields.Field(
+        column_name="Miejsce Pistol Squat", attribute="pistol_squat_position"
+    )
+
+    overall_points = fields.Field(
+        column_name="Punkty Ogółem", attribute="overall_points"
+    )
+    overall_position = fields.Field(
+        column_name="Miejsce Ogółem", attribute="overall_position"
     )
 
     class Meta:
@@ -116,45 +151,119 @@ class PlayerExportResource(resources.ModelResource):
             "snatch_kettlebell_weight",
             "snatch_repetitions",
             "snatch_results",
+            "snatch_position",
             "tgu_weight",
             "tgu_body_percent",
+            "tgu_position",
             "see_saw_press_weight_left",
             "see_saw_press_weight_right",
             "see_saw_press_body_percent_left",
             "see_saw_press_body_percent_right",
+            "see_saw_press_position",
             "kb_squat_weight",
             "kb_squat_body_percent",
+            "kb_squat_position",
+            "pistol_squat_weight",
+            "pistol_squat_body_percent",
+            "pistol_squat_position",
+            "overall_points",
+            "overall_position",
             "tiebreak",
         )
         export_order = fields
 
     def dehydrate_snatch_results(self, player):
-        return player.snatch_results() if player.snatch_results() is not None else "N/A"
+        result = (
+            player.snatch_results() if player.snatch_results() is not None else "N/A"
+        )
+        print(f"Exporting Snatch Results for {player}: {result}")
+        return result
+
+    def dehydrate_snatch_position(self, player):
+        snatch_result = player.snatchresult_set.first()
+        position = snatch_result.position if snatch_result else "N/A"
+        print(f"Exporting Snatch Position for {player}: {position}")
+        return position
 
     def dehydrate_tgu_body_percent(self, player):
-        return (
+        result = (
             f"{player.tgu_body_percent_weight():.2f}%"
             if player.tgu_body_percent_weight() is not None
             else "N/A"
         )
+        print(f"Exporting TGU Body Percent for {player}: {result}")
+        return result
+
+    def dehydrate_tgu_position(self, player):
+        tgu_result = player.tguresult_set.first()
+        position = tgu_result.position if tgu_result else "N/A"
+        print(f"Exporting TGU Position for {player}: {position}")
+        return position
 
     def dehydrate_see_saw_press_body_percent_left(self, player):
-        return (
+        result = (
             f"{player.see_saw_press_body_percent_weight_left():.2f}%"
             if player.see_saw_press_body_percent_weight_left() is not None
             else "N/A"
         )
+        print(f"Exporting See Saw Press Body Percent (Left) for {player}: {result}")
+        return result
 
     def dehydrate_see_saw_press_body_percent_right(self, player):
-        return (
+        result = (
             f"{player.see_saw_press_body_percent_weight_right():.2f}%"
             if player.see_saw_press_body_percent_weight_right() is not None
             else "N/A"
         )
+        print(f"Exporting See Saw Press Body Percent (Right) for {player}: {result}")
+        return result
+
+    def dehydrate_see_saw_press_position(self, player):
+        see_saw_result = player.seesawpressresult_set.first()
+        position = see_saw_result.position if see_saw_result else "N/A"
+        print(f"Exporting See Saw Press Position for {player}: {position}")
+        return position
 
     def dehydrate_kb_squat_body_percent(self, player):
-        return (
+        result = (
             f"{player.kb_squat_body_percent_weight():.2f}%"
             if player.kb_squat_body_percent_weight() is not None
             else "N/A"
         )
+        print(f"Exporting KB Squat Body Percent for {player}: {result}")
+        return result
+
+    def dehydrate_kb_squat_position(self, player):
+        kb_squat_result = player.kbsquatresult_set.first()
+        position = kb_squat_result.position if kb_squat_result else "N/A"
+        print(f"Exporting KB Squat Position for {player}: {position}")
+        return position
+
+    def dehydrate_pistol_squat_weight(self, player):
+        result = player.get_max_pistol_squat_weight()
+        print(f"Exporting Pistol Squat Weight for {player}: {result}")
+        return result
+
+    def dehydrate_pistol_squat_body_percent(self, player):
+        weight = player.get_max_pistol_squat_weight()
+        result = f"{(weight / player.weight * 100):.2f}%" if player.weight else "N/A"
+        print(f"Exporting Pistol Squat Body Percent for {player}: {result}")
+        return result
+
+    def dehydrate_pistol_squat_position(self, player):
+        pistol_squat_result = player.pistolsquatresult_set.first()
+        position = pistol_squat_result.position if pistol_squat_result else "N/A"
+        print(f"Exporting Pistol Squat Position for {player}: {position}")
+        return position
+
+    def dehydrate_overall_points(self, player):
+        overall_result = OverallResult.objects.filter(player=player).first()
+        points = overall_result.total_points if overall_result else "N/A"
+        print(f"Exporting Overall Points for {player}: {points}")
+        return points
+
+    def dehydrate_overall_position(self, player):
+        overall_result = OverallResult.objects.filter(player=player).first()
+        position = overall_result.final_position if overall_result else "N/A"
+        print(f"Exporting Overall Position for {player}: {position}")
+        return position

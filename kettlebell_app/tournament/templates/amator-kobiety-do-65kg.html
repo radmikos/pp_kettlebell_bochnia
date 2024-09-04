@@ -108,11 +108,11 @@
                 <th>Nazwisko</th>
                 <th>Imię</th>
                 <th class="weight-column">Waga</th>
+                {% if 'see_saw_press' in disciplines %}<th>See Saw Press Miejsce</th>{% endif %}`
                 {% if 'tgu' in disciplines %}<th>TGU Miejsce</th>{% endif %}
-                {% if 'see_saw_press' in disciplines %}<th>Press Miejsce</th>{% endif %}
                 {% if 'kb_squat' in disciplines %}<th>Squat Miejsce</th>{% endif %}
-                {% if 'snatch' in disciplines %}<th>Snatch Test Miejsce</th>{% endif %}
                 {% if 'pistols_squat' in disciplines %}<th>Pistol Squat Miejsce</th>{% endif %}
+                {% if 'snatch' in disciplines %}<th>Snatch Test Miejsce</th>{% endif %}
                 <th class="result-column">Total Punkty</th>
                 <th class="place-column">Total Miejsce</th>
                 <th>Uwagi</th>
@@ -125,11 +125,11 @@
                 <td>{{ result.player.surname }}</td>
                 <td>{{ result.player.name }}</td>
                 <td class="weight-column">{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
-                {% if 'tgu' in disciplines %}<td>{{ result.tgu_place }}</td>{% endif %}
                 {% if 'see_saw_press' in disciplines %}<td>{{ result.see_saw_press_place }}</td>{% endif %}
+                {% if 'tgu' in disciplines %}<td>{{ result.tgu_place }}</td>{% endif %}
                 {% if 'kb_squat' in disciplines %}<td>{{ result.kb_squat_place }}</td>{% endif %}
-                {% if 'snatch' in disciplines %}<td>{{ result.snatch_place }}</td>{% endif %}
                 {% if 'pistols_squat' in disciplines %}<td>{{ result.pistols_squat_place }}</td>{% endif %}
+                {% if 'snatch' in disciplines %}<td>{{ result.snatch_place }}</td>{% endif %}
                 <td class="result-column">{{ result.total_points }}</td>
                 <td class="place-column">{{ result.total_place }}</td>
                 <td>{% if result.tiebreak %}Dogrywka{% endif %}</td>
@@ -169,40 +169,6 @@
                 <td>{{ result.attempt_3 }}</td>
                 <td class="result-column">{{ result.max_result|floatformat:1 }}</td>
                 <td class="result-column">{{ result.bw_percentage|default_if_none:"-"|floatformat:1 }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-
-    {% if 'snatch' in disciplines %}
-    <h2>Wyniki Snatch</h2>
-    <table>
-        <thead>
-            <tr>
-                <th class="place-column">Miejsce</th>
-                <th>Nazwisko</th>
-                <th>Imię</th>
-                <th class="club-column">Klub / Miasto</th>
-                <th class="weight-column">Waga Ciała</th>
-                <th class="weight-column">Waga odważnika</th>
-                <th class="result-column">Ilość powtórzeń</th>
-                <th class="result-column">Waga Odważnika * il. powtórzeń</th>
-                <th class="result-column">%BW</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in snatch_results %}
-            <tr>
-                <td class="place-column">{{ result.position }}</td>
-                <td>{{ result.player.surname }}</td>
-                <td>{{ result.player.name }}</td>
-                <td class="club-column">{{ result.player.club.name }}</td>
-                <td class="weight-column">{{ result.weight }}</td>
-                <td class="weight-column">{{ result.kettlebell_weight }}</td>
-                <td class="result-column">{{ result.repetitions }}</td>
-                <td class="result-column">{{ result.max_result }}</td>
-                <td class="result-column">{{ result.bw_percentage|default_if_none:"-" }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -311,6 +277,39 @@
                 <td class="result-column">{{ result.attempt_3|floatformat:1 }}</td>
                 <td class="result-column">{{ result.max_result|floatformat:1 }}</td>
                 <td class="result-column">{{ result.bw_percentage|floatformat:1 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% if 'snatch' in disciplines %}
+    <h2>Wyniki Snatch</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="place-column">Miejsce</th>
+                <th>Nazwisko</th>
+                <th>Imię</th>
+                <th class="club-column">Klub / Miasto</th>
+                <th class="weight-column">Waga Ciała</th>
+                <th class="weight-column">Waga odważnika</th>
+                <th class="result-column">Ilość powtórzeń</th>
+                <th class="result-column">Waga Odważnika * il. powtórzeń</th>
+                <th class="result-column">%BW</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in snatch_results %}
+            <tr>
+                <td class="place-column">{{ result.position }}</td>
+                <td>{{ result.player.surname }}</td>
+                <td>{{ result.player.name }}</td>
+                <td class="club-column">{{ result.player.club.name }}</td>
+                <td class="weight-column">{{ result.weight }}</td>
+                <td class="weight-column">{{ result.kettlebell_weight }}</td>
+                <td class="result-column">{{ result.repetitions }}</td>
+                <td class="result-column">{{ result.max_result }}</td>
+                <td class="result-column">{{ result.bw_percentage|default_if_none:"-" }}</td>
             </tr>
             {% endfor %}
         </tbody>

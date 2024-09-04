@@ -1,7 +1,14 @@
 from django.shortcuts import render
 
-from .models import (Category, KBSquatResult, OverallResult, Player,
-                     SeeSawPressResult, SnatchResult, TGUResult)
+from .models import (
+    Category,
+    KBSquatResult,
+    OverallResult,
+    Player,
+    SeeSawPressResult,
+    SnatchResult,
+    TGUResult,
+)
 
 
 def create_or_update_results(category):
@@ -103,9 +110,16 @@ def category_view(request, category_slug):
 
 from django.shortcuts import render
 
-from .models import (Category, KBSquatResult, OverallResult,
-                     PistolSquatResult, Player, SeeSawPressResult,
-                     SnatchResult, TGUResult)
+from .models import (
+    Category,
+    KBSquatResult,
+    OverallResult,
+    PistolSquatResult,
+    Player,
+    SeeSawPressResult,
+    SnatchResult,
+    TGUResult,
+)
 
 
 def calculate_category_results(request, category_name, template_name):
@@ -165,7 +179,7 @@ def calculate_category_results(request, category_name, template_name):
                 "attempt_3": f"{result.result_left_3:.1f}/{result.result_right_3:.1f}",
             },
         },
-        "pistols_squat": {
+        "pistol_squat": {  # Changed from "pistols_squat" to "pistol_squat"
             "model": PistolSquatResult,
             "calculate": lambda player, result: {
                 "max_result": result.get_max_result(),
@@ -196,9 +210,6 @@ def calculate_category_results(request, category_name, template_name):
                             **config["calculate"](player, result),
                         }
                         results[discipline].append(discipline_result)
-                        position = result.position if result.position is not None else 0
-                        player_results[f"{discipline}_place"] = position
-                        total_points += position
                     except Exception as e:
                         print(
                             f"Error calculating results for {player} in {discipline}: {e}"
@@ -209,25 +220,30 @@ def calculate_category_results(request, category_name, template_name):
             else:
                 player_results[f"{discipline}_place"] = 0
 
-        player_results["total_points"] = total_points
-        player_results["tiebreak"] = player.tiebreak
         overall_results.append(player_results)
 
-    # Sortowanie i przypisywanie końcowych pozycji
-    overall_results.sort(key=lambda x: x["total_points"])
-    for position, result in enumerate(overall_results, 1):
-        result["total_place"] = position
-        result["final_score"] = (
-            result["total_points"] - 0.5
-            if result["tiebreak"]
-            else result["total_points"]
-        )
-
-    # Sortowanie wyników poszczególnych dyscyplin
-    for discipline in results:
+    # Calculate positions for each discipline
+    for discipline in disciplines:
         results[discipline].sort(key=lambda x: x["max_result"], reverse=True)
         for position, result in enumerate(results[discipline], 1):
             result["position"] = position
+            # Update the overall results with the position
+            for overall_result in overall_results:
+                if overall_result["player"] == result["player"]:
+                    overall_result[f"{discipline}_place"] = position
+                    overall_result["total_points"] = (
+                        overall_result.get("total_points", 0) + position
+                    )
+
+    # Sort and assign final positions for overall results
+    overall_results.sort(key=lambda x: x.get("total_points", 0))
+    for position, result in enumerate(overall_results, 1):
+        result["total_place"] = position
+        result["final_score"] = (
+            result.get("total_points", 0) - 0.5
+            if result["player"].tiebreak
+            else result.get("total_points", 0)
+        )
 
     context = {
         "category_name": category_name,
@@ -237,7 +253,7 @@ def calculate_category_results(request, category_name, template_name):
         "tgu_results": results.get("tgu", []),
         "see_saw_results": results.get("see_saw_press", []),
         "kb_squat_results": results.get("kb_squat", []),
-        "pistol_squat_results": results.get("pistols_squat", []),
+        "pistol_squat_results": results.get("pistol_squat", []),
     }
 
     return render(request, template_name, context)
