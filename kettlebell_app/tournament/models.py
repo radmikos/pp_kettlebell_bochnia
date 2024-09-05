@@ -194,11 +194,11 @@ class Player(models.Model):
 
     def see_saw_press_body_percent_weight_left(self, attempt):
         weight = getattr(self, f"see_saw_press_weight_left_{attempt}")
-        return (((weight * 3) / self.weight) * 100) if weight and self.weight else None
+        return weight if weight and self.weight else None
 
     def see_saw_press_body_percent_weight_right(self, attempt):
         weight = getattr(self, f"see_saw_press_weight_right_{attempt}")
-        return (((weight * 3) / self.weight) * 100) if weight and self.weight else None
+        return weight if weight and self.weight else None
 
 
 class SnatchResult(models.Model):
@@ -269,11 +269,18 @@ class SeeSawPressResult(models.Model):
         return (left * 3) + (right * 3) if left > 0 and right > 0 else 0
 
     def get_max_result(self):
-        return max(
-            (self.result_left_1 + self.result_right_1),
-            (self.result_left_2 + self.result_right_2),
-            (self.result_left_3 + self.result_right_3),
-        )
+        valid_attempts = [
+            self.result_left_1 + self.result_right_1
+            if self.result_left_1 > 0 and self.result_right_1 > 0
+            else 0,
+            self.result_left_2 + self.result_right_2
+            if self.result_left_2 > 0 and self.result_right_2 > 0
+            else 0,
+            self.result_left_3 + self.result_right_3
+            if self.result_left_3 > 0 and self.result_right_3 > 0
+            else 0,
+        ]
+        return max(valid_attempts)
 
 
 class BestSeeSawPressResult(models.Model):
