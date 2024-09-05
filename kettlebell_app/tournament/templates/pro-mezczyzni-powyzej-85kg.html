@@ -3,47 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gfdgfdsgdfgfdsgs - Wyniki</title>
+    <title>{{ category_name }} - Wyniki Zawodów</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
-        header { background: #f4f4f4; padding: 1rem; text-align: center; }
-        main { padding: 2rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        footer { background: #333; color: #fff; text-align: center; padding: 1rem; position: fixed; bottom: 0; width: 100%; }
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            background-color: #1a1a1a; /* 80% czarne tło */
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #ffffff;
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 3px rgba(255, 255, 255, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333333;
+        }
+
+        th {
+            background-color: #4a6741; /* Ziemnozielony kolor dla belek z kategoriami */
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: #2a2a2a;
+        }
+
+        tr:hover {
+            background-color: #ffd700; /* Jasno żółty kolor przy najechaniu */
+            color: #000000;
+        }
+
+        /* Highlight for tiebreaker */
+        .tiebreak {
+            background-color: #006400 !important; /* Ciemniejszy zielony dla dogrywki */
+            font-weight: bold;
+        }
+
+        /* Styles for top 3 places */
+        tr:nth-child(1) {
+            background-color: #ffd700; /* Złoty */
+            color: #000000;
+        }
+
+        tr:nth-child(2) {
+            background-color: #c0c0c0; /* Srebrny */
+            color: #000000;
+        }
+
+        tr:nth-child(3) {
+            background-color: #cd7f32; /* Brązowy */
+            color: #000000;
+        }
+
+        /* Responsive design */
+        @media screen and (max-width: 600px) {
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+
+        /* Additional styles for specific columns */
+        .weight-column, .result-column {
+            text-align: right;
+        }
+
+        .place-column {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .club-column {
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Afdsfdsafdsafdsadsfdsakg - Wyniki</h1>
-    </header>
+    <h1>{{ category_name }}</h1>
 
-    <main>
-        <table>
+    <h2>Wyniki ogólne</h2>
+    <table>
+        <thead>
             <tr>
-                <th>Miejsce</th>
-                <th>Imię i Nazwisko</th>
-                <th>Klub</th>
-                <th>Wynik Rwania</th>
-                <th>Wynik TGU</th>
-                <th>Suma punktów</th>
+                <th>Nazwisko</th>
+                <th>Imię</th>
+                <th class="weight-column">Waga</th>
+                {% if 'see_saw_press' in disciplines %}<th>See Saw Press Miejsce</th>{% endif %}`
+                {% if 'tgu' in disciplines %}<th>TGU Miejsce</th>{% endif %}
+                {% if 'kb_squat' in disciplines %}<th>Squat Miejsce</th>{% endif %}
+                {% if 'pistols_squat' in disciplines %}<th>Pistol Squat Miejsce</th>{% endif %}
+                {% if 'snatch' in disciplines %}<th>Snatch Test Miejsce</th>{% endif %}
+                <th class="result-column">Total Punkty</th>
+                <th class="place-column">Total Miejsce</th>
+                <th>Uwagi</th>
+                <th class="result-column">Ostateczny Wynik</th>
             </tr>
-            {% for result in results %}
-            <tr>
-                <td>{{ result.final_position }}</td>
-                <td>{{ result.player.name }} {{ result.player.surname }}</td>
-                <td>{{ result.player.club.name }}</td>
-                <td>{{ result.snatch_points }}</td>
-                <td>{{ result.tgu_points }}</td>
-                <td>{{ result.total_points }}</td>
+        </thead>
+        <tbody>
+            {% for result in overall_results %}
+            <tr {% if result.tiebreak %}class="tiebreak"{% endif %}>
+                <td>{{ result.player.surname }}</td>
+                <td>{{ result.player.name }}</td>
+                <td class="weight-column">{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
+                {% if 'see_saw_press' in disciplines %}<td>{{ result.see_saw_press_place }}</td>{% endif %}
+                {% if 'tgu' in disciplines %}<td>{{ result.tgu_place }}</td>{% endif %}
+                {% if 'kb_squat' in disciplines %}<td>{{ result.kb_squat_place }}</td>{% endif %}
+                {% if 'pistols_squat' in disciplines %}<td>{{ result.pistols_squat_place }}</td>{% endif %}
+                {% if 'snatch' in disciplines %}<td>{{ result.snatch_place }}</td>{% endif %}
+                <td class="result-column">{{ result.total_points }}</td>
+                <td class="place-column">{{ result.total_place }}</td>
+                <td>{% if result.tiebreak %}Dogrywka{% endif %}</td>
+                <td class="result-column">{{ result.final_score|floatformat:1 }}</td>
             </tr>
             {% endfor %}
-        </table>
-    </main>
+        </tbody>
+    </table>
 
-    <footer>
-        <p>&copy; 2023 Nazwa Twoich Zawodów. Wszelkie prawa zastrzeżone.</p>
-    </footer>
+    {% if 'see_saw_press' in disciplines %}
+    <h2>Wyniki See Saw Press</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="place-column">Miejsce</th>
+                <th>Nazwisko</th>
+                <th>Imię</th>
+                <th class="club-column">Klub</th>
+                <th class="weight-column">Waga ciała</th>
+                <th>Próba I (L/P)</th>
+                <th>Próba II (L/P)</th>
+                <th>Próba III (L/P)</th>
+                <th class="result-column">Wynik Max</th>
+                <th class="result-column">%BW</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in see_saw_results %}
+            <tr>
+                <td class="place-column">{{ result.position }}</td>
+                <td>{{ result.player.surname }}</td>
+                <td>{{ result.player.name }}</td>
+                <td class="club-column">{{ result.player.club.name }}</td>
+                <td class="weight-column">{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
+                <td>{{ result.attempt_1 }}</td>
+                <td>{{ result.attempt_2 }}</td>
+                <td>{{ result.attempt_3 }}</td>
+                <td class="result-column">{{ result.max_result|floatformat:1 }}</td>
+                <td class="result-column">{{ result.bw_percentage|default_if_none:"-"|floatformat:1 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if 'tgu' in disciplines %}
+    <h2>Wyniki TGU</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="place-column">Miejsce</th>
+                <th>Nazwisko</th>
+                <th>Imię</th>
+                <th class="club-column">Klub</th>
+                <th class="weight-column">Waga ciała</th>
+                <th class="result-column">Próba I</th>
+                <th class="result-column">Próba II</th>
+                <th class="result-column">Próba III</th>
+                <th class="result-column">Wynik Max</th>
+                <th class="result-column">%BW</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in tgu_results %}
+            <tr>
+                <td class="place-column">{{ result.position }}</td>
+                <td>{{ result.player.surname }}</td>
+                <td>{{ result.player.name }}</td>
+                <td class="club-column">{{ result.player.club.name }}</td>
+                <td class="weight-column">{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
+                <td class="result-column">{{ result.attempt_1|floatformat:1 }}</td>
+                <td class="result-column">{{ result.attempt_2|floatformat:1 }}</td>
+                <td class="result-column">{{ result.attempt_3|floatformat:1 }}</td>
+                <td class="result-column">{{ result.max_result|floatformat:1 }}</td>
+                <td class="result-column">{{ result.bw_percentage|floatformat:1 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if 'kb_squat' in disciplines %}
+    <h2>Wyniki KB Squat</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="place-column">Miejsce</th>
+                <th>Nazwisko</th>
+                <th>Imię</th>
+                <th class="club-column">Klub</th>
+                <th class="weight-column">Waga ciała</th>
+                <th>Próba I (L/P)</th>
+                <th>Próba II (L/P)</th>
+                <th>Próba III (L/P)</th>
+                <th class="result-column">Wynik Max</th>
+                <th class="result-column">%BW</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in kb_squat_results %}
+            <tr>
+                <td class="place-column">{{ result.position }}</td>
+                <td>{{ result.player.surname }}</td>
+                <td>{{ result.player.name }}</td>
+                <td class="club-column">{{ result.player.club.name }}</td>
+                <td class="weight-column">{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
+                <td>{{ result.attempt_1 }}</td>
+                <td>{{ result.attempt_2 }}</td>
+                <td>{{ result.attempt_3 }}</td>
+                <td class="result-column">{{ result.max_result|floatformat:1 }}</td>
+                <td class="result-column">{{ result.bw_percentage|default_if_none:"-"|floatformat:1 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if 'pistols_squat' in disciplines %}
+    <h2>Wyniki Pistol Squat</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="place-column">Miejsce</th>
+                <th>Nazwisko</th>
+                <th>Imię</th>
+                <th class="club-column">Klub</th>
+                <th class="weight-column">Waga ciała</th>
+                <th class="result-column">Próba I</th>
+                <th class="result-column">Próba II</th>
+                <th class="result-column">Próba III</th>
+                <th class="result-column">Wynik Max</th>
+                <th class="result-column">%BW</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in pistol_squat_results %}
+            <tr>
+                <td class="place-column">{{ result.position }}</td>
+                <td>{{ result.player.surname }}</td>
+                <td>{{ result.player.name }}</td>
+                <td class="club-column">{{ result.player.club.name }}</td>
+                <td class="weight-column">{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
+                <td class="result-column">{{ result.attempt_1|floatformat:1 }}</td>
+                <td class="result-column">{{ result.attempt_2|floatformat:1 }}</td>
+                <td class="result-column">{{ result.attempt_3|floatformat:1 }}</td>
+                <td class="result-column">{{ result.max_result|floatformat:1 }}</td>
+                <td class="result-column">{{ result.bw_percentage|floatformat:1 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% if 'snatch' in disciplines %}
+    <h2>Wyniki Snatch</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="place-column">Miejsce</th>
+                <th>Nazwisko</th>
+                <th>Imię</th>
+                <th class="club-column">Klub / Miasto</th>
+                <th class="weight-column">Waga Ciała</th>
+                <th class="weight-column">Waga odważnika</th>
+                <th class="result-column">Ilość powtórzeń</th>
+                <th class="result-column">Waga Odważnika * il. powtórzeń</th>
+                <th class="result-column">%BW</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in snatch_results %}
+            <tr>
+                <td class="place-column">{{ result.position }}</td>
+                <td>{{ result.player.surname }}</td>
+                <td>{{ result.player.name }}</td>
+                <td class="club-column">{{ result.player.club.name }}</td>
+                <td class="weight-column">{{ result.weight }}</td>
+                <td class="weight-column">{{ result.kettlebell_weight }}</td>
+                <td class="result-column">{{ result.repetitions }}</td>
+                <td class="result-column">{{ result.max_result }}</td>
+                <td class="result-column">{{ result.bw_percentage|default_if_none:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
 </body>
 </html>
