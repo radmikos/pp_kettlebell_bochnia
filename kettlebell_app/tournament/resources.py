@@ -1,7 +1,6 @@
 import logging
 
-from django.core.exceptions import MultipleObjectsReturned
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 

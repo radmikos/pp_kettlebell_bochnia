@@ -1,37 +1,83 @@
 from django.shortcuts import render
 
 from .forms import StationForm
-from .models import (Category, KBSquatResult, OverallResult, PistolSquatResult,
-                     Player, SeeSawPressResult, SnatchResult, TGUResult)
+from .models import (
+    BestKBSquatResult,
+    BestSeeSawPressResult,
+    Category,
+    KBSquatResult,
+    OverallResult,
+    PistolSquatResult,
+    Player,
+    SeeSawPressResult,
+    SnatchResult,
+    TGUResult,
+)
 
 
 def create_or_update_results(category):
     for player in Player.objects.filter(categories=category):
         # Snatch
-        if player.snatch_results() is not None:
-            SnatchResult.objects.update_or_create(
-                player=player, defaults={"result": player.snatch_results()}
-            )
+        SnatchResult.objects.update_or_create(
+            player=player, defaults={"result": player.snatch_results() or 0}
+        )
 
         # TGU
-        if player.tgu_body_percent_weight() is not None:
-            TGUResult.objects.update_or_create(
-                player=player, defaults={"result": player.tgu_body_percent_weight()}
-            )
+        TGUResult.objects.update_or_create(
+            player=player,
+            defaults={
+                "result_1": player.tgu_weight_1 or 0,
+                "result_2": player.tgu_weight_2 or 0,
+                "result_3": player.tgu_weight_3 or 0,
+            },
+        )
 
         # See Saw Press
-        if player.see_saw_press_body_percent_weight() is not None:
-            SeeSawPressResult.objects.update_or_create(
-                player=player,
-                defaults={"result": player.see_saw_press_body_percent_weight()},
-            )
+        SeeSawPressResult.objects.update_or_create(
+            player=player,
+            defaults={
+                "result_left_1": player.see_saw_press_body_percent_weight_left(1) or 0,
+                "result_right_1": player.see_saw_press_body_percent_weight_right(1)
+                or 0,
+                "result_left_2": player.see_saw_press_body_percent_weight_left(2) or 0,
+                "result_right_2": player.see_saw_press_body_percent_weight_right(2)
+                or 0,
+                "result_left_3": player.see_saw_press_body_percent_weight_left(3) or 0,
+                "result_right_3": player.see_saw_press_body_percent_weight_right(3)
+                or 0,
+            },
+        )
 
         # KB Squat
-        if player.kb_squat_body_percent_weight() is not None:
-            KBSquatResult.objects.update_or_create(
-                player=player,
-                defaults={"result": player.kb_squat_body_percent_weight()},
-            )
+        KBSquatResult.objects.update_or_create(
+            player=player,
+            defaults={
+                "result_left_1": player.kb_squat_body_percent_weight("left", 1),
+                "result_right_1": player.kb_squat_body_percent_weight("right", 1),
+                "result_left_2": player.kb_squat_body_percent_weight("left", 2),
+                "result_right_2": player.kb_squat_body_percent_weight("right", 2),
+                "result_left_3": player.kb_squat_body_percent_weight("left", 3),
+                "result_right_3": player.kb_squat_body_percent_weight("right", 3),
+            },
+        )
+
+        # Pistol Squat
+        PistolSquatResult.objects.update_or_create(
+            player=player,
+            defaults={
+                "result_1": player.pistol_squat_weight_1 or 0,
+                "result_2": player.pistol_squat_weight_2 or 0,
+                "result_3": player.pistol_squat_weight_3 or 0,
+            },
+        )
+
+        # Update best results
+        BestSeeSawPressResult.objects.update_or_create(player=player, defaults={})
+        BestKBSquatResult.objects.update_or_create(player=player, defaults={})
+
+        # The update methods will be called in the save() method of these models
+        player.bestseesawpressresult.update_best_results()
+        player.bestkbsquatresult.update_best_result()
 
 
 def calculate_positions(result_model, category):
@@ -293,11 +339,11 @@ def pro_mezczyzni_powyzej_85kg(request):
     )
 
 
-
-
 from django.shortcuts import render
+
 from .forms import StationForm
-from .models import Player, Category
+from .models import Category, Player
+
 
 def generate_start_list(request):
     if request.method == "POST":
@@ -307,7 +353,9 @@ def generate_start_list(request):
             stations = form.cleaned_data["stations"]
 
             category = Category.objects.get(name=category_name)
-            players = Player.objects.filter(categories=category).order_by('surname', 'name')
+            players = Player.objects.filter(categories=category).order_by(
+                "surname", "name"
+            )
             player_count = players.count()
 
             if stations == 0:
@@ -329,7 +377,9 @@ def generate_start_list(request):
             stations_list = [
                 {
                     "station_number": i + 1,
-                    "players": players[i * players_per_station : (i + 1) * players_per_station],
+                    "players": players[
+                        i * players_per_station : (i + 1) * players_per_station
+                    ],
                 }
                 for i in range(stations)
             ]
