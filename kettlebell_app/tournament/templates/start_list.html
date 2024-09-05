@@ -1,0 +1,56 @@
+<h1>Start List for {{ category }}</h1>
+<p>Number of Stations: {{ stations }}</p>
+
+{% if stations_list %}
+    {% for station in stations_list %}
+        <h2>Station {{ station.station_number }}</h2>
+        <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Surname</th>
+                    <th>KB Squat Result</th>
+                    <th>See Saw Press Result</th>
+                    <th>TGU Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in station.players %}
+                <tr>
+                    <td>{{ player.name }}</td>
+                    <td>{{ player.surname }}</td>
+                    <td>
+                        {% with kb_squat_results|get_item:player.id as kb_squat %}
+                            {% if kb_squat %}
+                                {{ kb_squat.get_max_result }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% with seesaw_press_results|get_item:player.id as seesaw_press %}
+                            {% if seesaw_press %}
+                                {{ seesaw_press.get_max_result }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% with tgu_results|get_item:player.id as tgu %}
+                            {% if tgu %}
+                                {{ tgu.get_max_result }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+{% else %}
+    <p>No players found for this category.</p>
+{% endif %}
