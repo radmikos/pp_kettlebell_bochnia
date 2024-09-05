@@ -51,6 +51,5 @@ urlpatterns = [
         views.pro_mezczyzni_powyzej_85kg,
         name="pro_mezczyzni_powyzej_85kg",
     ),
-    path("nagroda-specjalna/", views.nagroda_specjalna, name="nagroda_specjalna"),
     path("generate_start_list/", views.generate_start_list, name="generate_start_list"),
 ]

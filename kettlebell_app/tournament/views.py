@@ -293,10 +293,6 @@ def pro_mezczyzni_powyzej_85kg(request):
     )
 
 
-def nagroda_specjalna(request):
-    return calculate_category_results(
-        request, "Nagroda_specjalna", "nagroda-specjalna.html"
-    )
 
 
 from django.shortcuts import render
