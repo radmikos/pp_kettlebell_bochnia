@@ -1,5 +1,6 @@
 from django.core.exceptions import MultipleObjectsReturned  # Dodane importy
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ValidationError
+from django.db.models import Q
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 
@@ -10,20 +11,19 @@ class CustomForeignKeyWidget(ForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if value:
             try:
-                return self.get_queryset(value, row, *args, **kwargs).get(
-                    **{self.field: value}
+                return (
+                    self.get_queryset(value, row, *args, **kwargs)
+                    .filter(**{self.field: value})
+                    .first()
                 )
             except self.model.DoesNotExist:
                 return self.model.objects.create(**{self.field: value})
-            except self.model.MultipleObjectsReturned:
-                return self.get_queryset(value, row, *args, **kwargs).first()
         return None
 
 
 class PlayerImportResource(resources.ModelResource):
     name = fields.Field(column_name="Imię", attribute="name")
     surname = fields.Field(column_name="Nazwisko", attribute="surname")
-    weight = fields.Field(column_name="Waga", attribute="weight")
     club = fields.Field(
         column_name="Klub",
         attribute="club",
@@ -34,53 +34,94 @@ class PlayerImportResource(resources.ModelResource):
         attribute="categories",
         widget=ManyToManyWidget(Category, field="name", separator=", "),
     )
-    snatch_kettlebell_weight = fields.Field(
-        column_name="Ciężar kettla (rwanie)", attribute="snatch_kettlebell_weight"
-    )
-    snatch_repetitions = fields.Field(
-        column_name="Liczba powtórzeń (rwanie)", attribute="snatch_repetitions"
-    )
-    tgu_weight = fields.Field(column_name="Ciężar TGU", attribute="tgu_weight")
-    see_saw_press_weight_left = fields.Field(
-        column_name="Ciężar See Saw Press (lewa)", attribute="see_saw_press_weight_left"
-    )
-    see_saw_press_weight_right = fields.Field(
-        column_name="Ciężar See Saw Press (prawa)",
-        attribute="see_saw_press_weight_right",
-    )
-    kb_squat_weight = fields.Field(
-        column_name="Ciężar KB Squat", attribute="kb_squat_weight"
-    )
-    tiebreak = fields.Field(column_name="Dogrywka", attribute="tiebreak")
-
-    def before_import_row(self, row, **kwargs):
-        try:
-            player = Player.objects.get(
-                name=row["Imię"], surname=row["Nazwisko"], club__name=row["Klub"]
-            )
-            # Sprawdź, czy kategoria już jest przypisana
-            categories = row["Kategoria"].split(", ")
-            for category_name in categories:
-                category, created = Category.objects.get_or_create(name=category_name)
-                if not player.categories.filter(id=category.id).exists():
-                    player.categories.add(category)
-            row[
-                "skip_row"
-            ] = True  # Oznacz wiersz jako przetworzony, aby nie tworzyć duplikatów
-        except ObjectDoesNotExist:
-            pass
-        except MultipleObjectsReturned:
-            player = Player.objects.filter(
-                name=row["Imię"], surname=row["Nazwisko"], club__name=row["Klub"]
-            ).first()
 
     class Meta:
         model = Player
+        fields = ("name", "surname", "club", "categories")
+        import_id_fields = ["name", "surname", "club"]
+
+    def before_import_row(self, row, **kwargs):
+        club_name = row.get("Klub", "")
+        name = row.get("Imię", "")
+        surname = row.get("Nazwisko", "")
+        categories = row.get("Kategoria", "").split(", ")
+
+        try:
+            club, _ = SportClub.objects.get_or_create(name=club_name)
+            player, created = Player.objects.get_or_create(
+                name=name, surname=surname, club=club, defaults={"club": club}
+            )
+
+            for category_name in categories:
+                category, _ = Category.objects.get_or_create(name=category_name)
+                player.categories.add(category)
+
+            # Ustawiamy dane w wierszu, aby były użyte przez import_row
+            row["name"] = name
+            row["surname"] = surname
+            row["club"] = club_name
+            row["categories"] = ", ".join(categories)
+
+        except ValidationError:
+            # Obsłuż błąd walidacji, jeśli to konieczne
+            pass
+
+    def import_row(self, row, instance_loader, **kwargs):
+        try:
+            # Pobieranie pól z wiersza
+            params = {}
+            for field in self.get_fields():
+                field_name = self.get_field_name(field)
+                params[field_name] = field.clean(row)
+
+            # Sprawdzenie, czy zawodnik istnieje
+            existing_player = Player.objects.filter(
+                Q(name=params["name"])
+                & Q(surname=params["surname"])
+                & Q(club__name=params["club"])
+            ).first()
+
+            # Jeśli zawodnik istnieje
+            if existing_player:
+                # Wywołujemy standardowy mechanizm importowania, aby uzyskać wynik
+                result = super(PlayerImportResource, self).import_row(
+                    row, instance_loader, **kwargs
+                )
+
+                # Aktualizujemy kategorie po wywołaniu `import_row`
+                new_categories = params["categories"]
+                existing_categories = set(
+                    existing_player.categories.values_list("name", flat=True)
+                )
+
+                for category in new_categories:
+                    if category not in existing_categories:
+                        category_instance, _ = Category.objects.get_or_create(
+                            name=category
+                        )
+                        existing_player.categories.add(category_instance)
+
+                # Zwracamy wynik, aby nie powodować błędów w bibliotece import-export
+                return result
+            else:
+                # Jeśli zawodnik nie istnieje, wykonaj normalne importowanie
+                return super(PlayerImportResource, self).import_row(
+                    row, instance_loader, **kwargs
+                )
+
+        except Exception as e:
+            # Obsługa błędów
+            print(f"Error during import: {str(e)}")
+            return super(PlayerImportResource, self).import_row(
+                row, instance_loader, **kwargs
+            )
 
 
+from django.db.models import F, Max
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
-from .models import Player, SportClub, Category, OverallResult
+
+from .models import Category, Player, SportClub
 
 
 class PlayerExportResource(resources.ModelResource):
@@ -88,61 +129,36 @@ class PlayerExportResource(resources.ModelResource):
         column_name="Klub", attribute="club", widget=ForeignKeyWidget(SportClub, "name")
     )
     categories = fields.Field(
-        column_name="Kategoria",
+        column_name="Kategorie",
         attribute="categories",
         widget=ManyToManyWidget(Category, field="name", separator=", "),
     )
-    snatch_results = fields.Field(
-        column_name="Wyniki Rwania", attribute="snatch_results"
-    )
-    snatch_position = fields.Field(
-        column_name="Miejsce Rwanie", attribute="snatch_position"
-    )
 
-    tgu_body_percent = fields.Field(
-        column_name="TGU % Wagi Ciała", attribute="tgu_body_percent_weight"
-    )
-    tgu_position = fields.Field(column_name="Miejsce TGU", attribute="tgu_position")
+    snatch_result = fields.Field(column_name="Snatch Wynik", attribute="snatch_results")
+    snatch_position = fields.Field(column_name="Snatch Pozycja")
 
-    see_saw_press_body_percent_left = fields.Field(
-        column_name="See Saw Press % Wagi Ciała (lewa)",
-        attribute="see_saw_press_body_percent_weight_left",
-    )
-    see_saw_press_body_percent_right = fields.Field(
-        column_name="See Saw Press % Wagi Ciała (prawa)",
-        attribute="see_saw_press_body_percent_weight_right",
-    )
-    see_saw_press_position = fields.Field(
-        column_name="Miejsce See Saw Press", attribute="see_saw_press_position"
-    )
+    tgu_max = fields.Field(column_name="TGU Max")
+    tgu_bw_percentage = fields.Field(column_name="TGU %BW")
+    tgu_position = fields.Field(column_name="TGU Pozycja")
 
-    kb_squat_body_percent = fields.Field(
-        column_name="KB Squat % Wagi Ciała", attribute="kb_squat_body_percent_weight"
-    )
-    kb_squat_position = fields.Field(
-        column_name="Miejsce KB Squat", attribute="kb_squat_position"
-    )
+    see_saw_press_max_left = fields.Field(column_name="See Saw Press Max Lewy")
+    see_saw_press_max_right = fields.Field(column_name="See Saw Press Max Prawy")
+    see_saw_press_position = fields.Field(column_name="See Saw Press Pozycja")
 
-    pistol_squat_weight = fields.Field(
-        column_name="Pistol Squat Waga", attribute="pistol_squat_weight"
-    )
-    pistol_squat_body_percent = fields.Field(
-        column_name="Pistol Squat % Wagi Ciała", attribute="pistol_squat_body_percent"
-    )
-    pistol_squat_position = fields.Field(
-        column_name="Miejsce Pistol Squat", attribute="pistol_squat_position"
-    )
+    kb_squat_max = fields.Field(column_name="KB Squat Max")
+    kb_squat_position = fields.Field(column_name="KB Squat Pozycja")
 
-    overall_points = fields.Field(
-        column_name="Punkty Ogółem", attribute="overall_points"
-    )
-    overall_position = fields.Field(
-        column_name="Miejsce Ogółem", attribute="overall_position"
-    )
+    pistol_squat_max = fields.Field(column_name="Pistol Squat Max")
+    pistol_squat_position = fields.Field(column_name="Pistol Squat Pozycja")
+
+    total_points = fields.Field(column_name="Suma Punktów")
+    final_position = fields.Field(column_name="Pozycja Końcowa")
+    final_score = fields.Field(column_name="Ostateczny Wynik")
 
     class Meta:
         model = Player
         fields = (
+            "id",
             "name",
             "surname",
             "weight",
@@ -150,120 +166,143 @@ class PlayerExportResource(resources.ModelResource):
             "categories",
             "snatch_kettlebell_weight",
             "snatch_repetitions",
-            "snatch_results",
+            "snatch_result",
             "snatch_position",
-            "tgu_weight",
-            "tgu_body_percent",
+            "tgu_weight_1",
+            "tgu_weight_2",
+            "tgu_weight_3",
+            "tgu_max",
+            "tgu_bw_percentage",
             "tgu_position",
-            "see_saw_press_weight_left",
-            "see_saw_press_weight_right",
-            "see_saw_press_body_percent_left",
-            "see_saw_press_body_percent_right",
+            "see_saw_press_weight_left_1",
+            "see_saw_press_weight_right_1",
+            "see_saw_press_weight_left_2",
+            "see_saw_press_weight_right_2",
+            "see_saw_press_weight_left_3",
+            "see_saw_press_weight_right_3",
+            "see_saw_press_max_left",
+            "see_saw_press_max_right",
             "see_saw_press_position",
-            "kb_squat_weight",
-            "kb_squat_body_percent",
+            "kb_squat_weight_left_1",
+            "kb_squat_weight_right_1",
+            "kb_squat_weight_left_2",
+            "kb_squat_weight_right_2",
+            "kb_squat_weight_left_3",
+            "kb_squat_weight_right_3",
+            "kb_squat_max",
             "kb_squat_position",
-            "pistol_squat_weight",
-            "pistol_squat_body_percent",
+            "pistol_squat_weight_1",
+            "pistol_squat_weight_2",
+            "pistol_squat_weight_3",
+            "pistol_squat_max",
             "pistol_squat_position",
-            "overall_points",
-            "overall_position",
             "tiebreak",
+            "total_points",
+            "final_position",
+            "final_score",
         )
         export_order = fields
 
-    def dehydrate_snatch_results(self, player):
-        result = (
-            player.snatch_results() if player.snatch_results() is not None else "N/A"
+    def get_queryset(self):
+        return (
+            Player.objects.annotate(
+                tgu_max=Max(F("tgu_weight_1"), F("tgu_weight_2"), F("tgu_weight_3")),
+                pistol_squat_max=Max(
+                    F("pistol_squat_weight_1"),
+                    F("pistol_squat_weight_2"),
+                    F("pistol_squat_weight_3"),
+                ),
+            )
+            .select_related("club")
+            .prefetch_related(
+                "categories",
+                "snatchresult_set",
+                "tguresult_set",
+                "seesawpressresult_set",
+                "kbsquatresult_set",
+                "pistolsquatresult_set",
+                "overallresult_set",
+            )
         )
-        print(f"Exporting Snatch Results for {player}: {result}")
-        return result
 
     def dehydrate_snatch_position(self, player):
-        snatch_result = player.snatchresult_set.first()
-        position = snatch_result.position if snatch_result else "N/A"
-        print(f"Exporting Snatch Position for {player}: {position}")
-        return position
-
-    def dehydrate_tgu_body_percent(self, player):
-        result = (
-            f"{player.tgu_body_percent_weight():.2f}%"
-            if player.tgu_body_percent_weight() is not None
-            else "N/A"
+        return (
+            player.snatchresult_set.first().position
+            if player.snatchresult_set.exists()
+            else None
         )
-        print(f"Exporting TGU Body Percent for {player}: {result}")
-        return result
+
+    def dehydrate_tgu_bw_percentage(self, player):
+        return (player.tgu_max / player.weight * 100) if player.weight else None
 
     def dehydrate_tgu_position(self, player):
-        tgu_result = player.tguresult_set.first()
-        position = tgu_result.position if tgu_result else "N/A"
-        print(f"Exporting TGU Position for {player}: {position}")
-        return position
-
-    def dehydrate_see_saw_press_body_percent_left(self, player):
-        result = (
-            f"{player.see_saw_press_body_percent_weight_left():.2f}%"
-            if player.see_saw_press_body_percent_weight_left() is not None
-            else "N/A"
+        return (
+            player.tguresult_set.first().position
+            if player.tguresult_set.exists()
+            else None
         )
-        print(f"Exporting See Saw Press Body Percent (Left) for {player}: {result}")
-        return result
 
-    def dehydrate_see_saw_press_body_percent_right(self, player):
-        result = (
-            f"{player.see_saw_press_body_percent_weight_right():.2f}%"
-            if player.see_saw_press_body_percent_weight_right() is not None
-            else "N/A"
+    def dehydrate_see_saw_press_max_left(self, player):
+        result = player.seesawpressresult_set.first()
+        return (
+            max(
+                result.result_left_1 or 0,
+                result.result_left_2 or 0,
+                result.result_left_3 or 0,
+            )
+            if result
+            else None
         )
-        print(f"Exporting See Saw Press Body Percent (Right) for {player}: {result}")
-        return result
+
+    def dehydrate_see_saw_press_max_right(self, player):
+        result = player.seesawpressresult_set.first()
+        return (
+            max(
+                result.result_right_1 or 0,
+                result.result_right_2 or 0,
+                result.result_right_3 or 0,
+            )
+            if result
+            else None
+        )
 
     def dehydrate_see_saw_press_position(self, player):
-        see_saw_result = player.seesawpressresult_set.first()
-        position = see_saw_result.position if see_saw_result else "N/A"
-        print(f"Exporting See Saw Press Position for {player}: {position}")
-        return position
-
-    def dehydrate_kb_squat_body_percent(self, player):
-        result = (
-            f"{player.kb_squat_body_percent_weight():.2f}%"
-            if player.kb_squat_body_percent_weight() is not None
-            else "N/A"
+        return (
+            player.seesawpressresult_set.first().position
+            if player.seesawpressresult_set.exists()
+            else None
         )
-        print(f"Exporting KB Squat Body Percent for {player}: {result}")
-        return result
+
+    def dehydrate_kb_squat_max(self, player):
+        result = player.kbsquatresult_set.first()
+        return result.get_max_result() if result else None
 
     def dehydrate_kb_squat_position(self, player):
-        kb_squat_result = player.kbsquatresult_set.first()
-        position = kb_squat_result.position if kb_squat_result else "N/A"
-        print(f"Exporting KB Squat Position for {player}: {position}")
-        return position
-
-    def dehydrate_pistol_squat_weight(self, player):
-        result = player.get_max_pistol_squat_weight()
-        print(f"Exporting Pistol Squat Weight for {player}: {result}")
-        return result
-
-    def dehydrate_pistol_squat_body_percent(self, player):
-        weight = player.get_max_pistol_squat_weight()
-        result = f"{(weight / player.weight * 100):.2f}%" if player.weight else "N/A"
-        print(f"Exporting Pistol Squat Body Percent for {player}: {result}")
-        return result
+        return (
+            player.kbsquatresult_set.first().position
+            if player.kbsquatresult_set.exists()
+            else None
+        )
 
     def dehydrate_pistol_squat_position(self, player):
-        pistol_squat_result = player.pistolsquatresult_set.first()
-        position = pistol_squat_result.position if pistol_squat_result else "N/A"
-        print(f"Exporting Pistol Squat Position for {player}: {position}")
-        return position
+        return (
+            player.pistolsquatresult_set.first().position
+            if player.pistolsquatresult_set.exists()
+            else None
+        )
 
-    def dehydrate_overall_points(self, player):
-        overall_result = OverallResult.objects.filter(player=player).first()
-        points = overall_result.total_points if overall_result else "N/A"
-        print(f"Exporting Overall Points for {player}: {points}")
-        return points
+    def dehydrate_total_points(self, player):
+        overall = player.overallresult_set.first()
+        return overall.total_points if overall else None
 
-    def dehydrate_overall_position(self, player):
-        overall_result = OverallResult.objects.filter(player=player).first()
-        position = overall_result.final_position if overall_result else "N/A"
-        print(f"Exporting Overall Position for {player}: {position}")
-        return position
+    def dehydrate_final_position(self, player):
+        overall = player.overallresult_set.first()
+        return overall.final_position if overall else None
+
+    def dehydrate_final_score(self, player):
+        overall = player.overallresult_set.first()
+        if overall:
+            return (
+                overall.total_points - 0.5 if player.tiebreak else overall.total_points
+            )
+        return None

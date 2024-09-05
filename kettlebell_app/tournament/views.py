@@ -277,107 +277,53 @@ def amator_mezczyzni_do_85kg(request):
     )
 
 
-def amator_kobiety_powyzej_65kg(request):
-    category = Category.objects.get(name="Amator_Kobiety_powyżej_65kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
-    )
-    return render(request, "amator-kobiety-powyzej-65kg.html", {"results": results})
-
-
-def amator_mezczyzni_do_85kg(request):
-    category = Category.objects.get(name="Pro_Mężczyźni_powyżej_85kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
-    )
-    return render(request, "pro_mezczyzni_powyzej_85kg.html", {"results": results})
-
-
 def amator_mezczyzni_powyzej_85kg(request):
-    category = Category.objects.get(name="Amator_Kobiety_do_65kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
+    return calculate_category_results(
+        request, "Amator_Mężczyźni_powyżej_85kg", "amator-mezczyzni-powyzej-85kg.html"
     )
-    return render(request, "amator-kobiety-do-65kg.html", {"results": results})
 
 
 def masters_kobiety(request):
-    category = Category.objects.get(name="Amator_Kobiety_powyżej_65kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
+    return calculate_category_results(
+        request, "Masters_Kobiety", "masters-kobiety.html"
     )
-    return render(request, "amator-kobiety-powyzej-65kg.html", {"results": results})
-
-
-# Utwórz podobne funkcje dla pozostałych kategorii...
 
 
 def masters_mezczyzni(request):
-    category = Category.objects.get(name="Pro_Mężczyźni_powyżej_85kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
+    return calculate_category_results(
+        request, "Masters_Mężczyźni", "masters-mezczyzni.html"
     )
-    return render(request, "pro_mezczyzni_powyzej_85kg.html", {"results": results})
 
 
 def najlepsza_bochnianka(request):
-    category = Category.objects.get(name="Amator_Kobiety_do_65kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
+    return calculate_category_results(
+        request, "Najlepsza_Bochnianka", "najlepsza-bochnianka.html"
     )
-    return render(request, "amator-kobiety-do-65kg.html", {"results": results})
 
 
 def najlepszy_bochnianin(request):
-    category = Category.objects.get(name="Amator_Kobiety_powyżej_65kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
+    return calculate_category_results(
+        request, "Najlepszy_Bochnianin", "najlepszy-bochnianin.html"
     )
-    return render(request, "amator-kobiety-powyzej-65kg.html", {"results": results})
-
-
-# Utwórz podobne funkcje dla pozostałych kategorii...
 
 
 def pro_kobiety(request):
-    category = Category.objects.get(name="Pro_Mężczyźni_powyżej_85kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
-    )
-    return render(request, "pro_mezczyzni_powyzej_85kg.html", {"results": results})
+    return calculate_category_results(request, "Pro_Kobiety", "pro-kobiety.html")
 
 
 def pro_mezczyzni_do_85kg(request):
-    category = Category.objects.get(name="Amator_Kobiety_do_65kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
+    return calculate_category_results(
+        request, "Pro_Mężczyźni_do_85kg", "pro-mezczyzni-do-85kg.html"
     )
-    return render(request, "amator-kobiety-do-65kg.html", {"results": results})
 
 
 def pro_mezczyzni_powyzej_85kg(request):
-    category = Category.objects.get(name="Pro_Mężczyźni_powyżej_85kg")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
+    return calculate_category_results(
+        request, "Pro_Mężczyźni_powyżej_85kg", "pro-mezczyzni-powyzej-85kg.html"
     )
-    return render(request, "pro-mezczyzni-powyzej-85kg.html", {"results": results})
 
 
 def nagroda_specjalna(request):
-    category = Category.objects.get(name="Nagroda_specjalna")
-    results = OverallResult.objects.filter(player__categories=category).order_by(
-        "final_position"
+    return calculate_category_results(
+        request, "Nagroda_specjalna", "nagroda-specjalna.html"
     )
-    return render(request, "nagroda-specjalna.html", {"results": results})
-
-
-# def calculate_category_results(category):
-#     players = Player.objects.filter(categories=category)
-#     disciplines = category.get_disciplines()
-#
-#     results = {}
-#     for discipline in disciplines:
-#         if discipline in globals():
-#             results[discipline] = globals()[f"calculate_{discipline}_results"](players)
-#         else:
-#             print(f"Warning: No calculation function found for discipline {discipline}")

@@ -9,4 +9,4 @@ class TournamentAppConfig(AppConfig):
 
     def ready(self):
         # Importuj sygnały
-        import tournament.signals
+        pass
