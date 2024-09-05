@@ -420,13 +420,11 @@ def update_overall_results(category):
                     overall_result.pistol_squat_points = position
                 overall_result.save()
 
-    # Apply tiebreak
     for player in players:
         overall_result = OverallResult.objects.get(player=player)
         overall_result.tiebreak_points = -0.5 if player.tiebreak else 0
         overall_result.save()
 
-    # Assign final positions
     final_results = OverallResult.objects.filter(player__in=players).order_by(
         "total_points"
     )
