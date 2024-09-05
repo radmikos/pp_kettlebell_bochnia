@@ -165,3 +165,4 @@ cython_debug/
 kettlebell_app/.DS_Store
 kettlebell_app/tournament/.DS_Store
 .idea/workspace.xml
+.DS_Store
