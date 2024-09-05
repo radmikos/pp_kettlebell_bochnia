@@ -238,23 +238,48 @@ def calculate_category_results(request, category_name, template_name):
 
     for discipline in disciplines:
         results[discipline].sort(key=lambda x: x["max_result"], reverse=True)
-        for position, result in enumerate(results[discipline], 1):
-            result["position"] = position
+        current_position = 1
+        previous_result = None
+        for index, result in enumerate(results[discipline]):
+            if (
+                previous_result is not None
+                and result["max_result"] != previous_result["max_result"]
+            ):
+                current_position = index + 1
+            result["position"] = current_position
             for overall_result in overall_results:
                 if overall_result["player"] == result["player"]:
-                    overall_result[f"{discipline}_place"] = position
+                    overall_result[f"{discipline}_place"] = current_position
                     overall_result["total_points"] = (
-                        overall_result.get("total_points", 0) + position
+                        overall_result.get("total_points", 0) + current_position
                     )
+            previous_result = result
 
-    overall_results.sort(key=lambda x: x.get("total_points", 0))
-    for position, result in enumerate(overall_results, 1):
-        result["total_place"] = position
+    overall_results.sort(
+        key=lambda x: (x.get("total_points", 0), not x["player"].tiebreak)
+    )
+    current_position = 1
+    previous_score = None
+    for index, result in enumerate(overall_results):
         result["final_score"] = (
             result.get("total_points", 0) - 0.5
             if result["player"].tiebreak
             else result.get("total_points", 0)
         )
+        if previous_score is not None and result["final_score"] != previous_score:
+            current_position = index + 1
+        result["total_place"] = current_position
+        previous_score = result["final_score"]
+
+    overall_results.sort(key=lambda x: x["final_score"])
+
+    current_position = 1
+    previous_score = None
+    for index, result in enumerate(overall_results):
+        if previous_score is not None and result["final_score"] != previous_score:
+            current_position = index + 1
+        result["final_place"] = current_position
+        previous_score = result["final_score"]
 
     context = {
         "category_name": category_name,

@@ -102,43 +102,45 @@
     <h1>{{ category_name }}</h1>
 
     <h2>Wyniki ogólne</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Nazwisko</th>
-                <th>Imię</th>
-                <th class="weight-column">Waga</th>
-                {% if 'see_saw_press' in disciplines %}<th>See Saw Press Miejsce</th>{% endif %}`
-                {% if 'tgu' in disciplines %}<th>TGU Miejsce</th>{% endif %}
-                {% if 'kb_squat' in disciplines %}<th>Squat Miejsce</th>{% endif %}
-                {% if 'pistols_squat' in disciplines %}<th>Pistol Squat Miejsce</th>{% endif %}
-                {% if 'snatch' in disciplines %}<th>Snatch Test Miejsce</th>{% endif %}
-                <th class="result-column">Total Punkty</th>
-                <th class="place-column">Total Miejsce</th>
-                <th>Uwagi</th>
-                <th class="result-column">Ostateczny Wynik</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in overall_results %}
-            <tr {% if result.tiebreak %}class="tiebreak"{% endif %}>
-                <td>{{ result.player.surname }}</td>
-                <td>{{ result.player.name }}</td>
-                <td class="weight-column">{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
-                {% if 'see_saw_press' in disciplines %}<td>{{ result.see_saw_press_place }}</td>{% endif %}
-                {% if 'tgu' in disciplines %}<td>{{ result.tgu_place }}</td>{% endif %}
-                {% if 'kb_squat' in disciplines %}<td>{{ result.kb_squat_place }}</td>{% endif %}
-                {% if 'pistols_squat' in disciplines %}<td>{{ result.pistols_squat_place }}</td>{% endif %}
-                {% if 'snatch' in disciplines %}<td>{{ result.snatch_place }}</td>{% endif %}
-                <td class="result-column">{{ result.total_points }}</td>
-                <td class="place-column">{{ result.total_place }}</td>
-                <td>{% if result.tiebreak %}Dogrywka{% endif %}</td>
-                <td class="result-column">{{ result.final_score|floatformat:1 }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
+    <table>
+      <thead>
+        <tr>
+          <th>Nazwisko</th>
+          <th>Imię</th>
+          <th>Waga</th>
+          {% if 'see_saw_press' in disciplines %}<th>See Saw Press Miejsce</th>{% endif %}
+          {% if 'tgu' in disciplines %}<th>TGU Miejsce</th>{% endif %}
+          {% if 'kb_squat' in disciplines %}<th>Squat Miejsce</th>{% endif %}
+          {% if 'pistols_squat' in disciplines %}<th>Pistol Squat Miejsce</th>{% endif %}
+          {% if 'snatch' in disciplines %}<th>Snatch Test Miejsce</th>{% endif %}
+          <th>Total Punkty</th>
+          <th>Total Miejsce</th>
+          <th>Uwagi</th>
+          <th>Ostateczny Wynik</th>
+          <th>Końcowa Pozycja</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for result in overall_results %}
+        <tr style="{% if result.player.tiebreak %}background-color: #FFD700; font-weight: bold;{% endif %}">
+          <td>{{ result.player.surname }}</td>
+          <td>{{ result.player.name }}</td>
+          <td>{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
+          {% if 'see_saw_press' in disciplines %}<td>{{ result.see_saw_press_place }}</td>{% endif %}
+          {% if 'tgu' in disciplines %}<td>{{ result.tgu_place }}</td>{% endif %}
+          {% if 'kb_squat' in disciplines %}<td>{{ result.kb_squat_place }}</td>{% endif %}
+          {% if 'pistols_squat' in disciplines %}<td>{{ result.pistols_squat_place }}</td>{% endif %}
+          {% if 'snatch' in disciplines %}<td>{{ result.snatch_place }}</td>{% endif %}
+          <td>{{ result.total_points }}</td>
+          <td>{{ result.total_place }}</td>
+          <td>{% if result.player.tiebreak %}Dogrywka{% endif %}</td>
+          <td>{{ result.final_score|floatformat:1 }}</td>
+          <td>{{ result.final_place }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
     {% if 'tgu' in disciplines %}
     <h2>Wyniki TGU</h2>
