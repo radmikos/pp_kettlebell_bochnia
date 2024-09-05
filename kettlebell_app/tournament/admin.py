@@ -288,11 +288,11 @@ class OverallResultAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(BestSeeSawPressResult)
-class BestSeeSawPressResultAdmin(admin.ModelAdmin):
-    list_display = ("player", "best_left", "best_right")
-
-
-@admin.register(BestKBSquatResult)
-class BestKBSquatResultAdmin(admin.ModelAdmin):
-    list_display = ("player", "best_result")
+# @admin.register(BestSeeSawPressResult)
+# class BestSeeSawPressResultAdmin(admin.ModelAdmin):
+#     list_display = ("player", "best_left", "best_right")
+#
+#
+# @admin.register(BestKBSquatResult)
+# class BestKBSquatResultAdmin(admin.ModelAdmin):
+#     list_display = ("player", "best_result")
