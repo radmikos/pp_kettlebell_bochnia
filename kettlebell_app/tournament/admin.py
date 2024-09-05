@@ -156,136 +156,136 @@ class PlayerAdmin(ImportExportModelAdmin):
         pistol_squat_result.save()
 
 
-@admin.register(SportClub)
-class SportClubAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+# @admin.register(SportClub)
+# class SportClubAdmin(admin.ModelAdmin):
+#     list_display = ("name",)
+#
+#
+# @admin.register(Category)
+# class CategoryAdmin(admin.ModelAdmin):
+#     form = CategoryAdminForm
+#     list_display = ("name", "get_disciplines_display")
+#
+#     def get_disciplines_display(self, obj):
+#         return ", ".join(obj.get_disciplines())
+#
+#     get_disciplines_display.short_description = "Konkurencje"
+#
+#
+# @admin.register(SnatchResult)
+# class SnatchResultAdmin(admin.ModelAdmin):
+#     list_display = ("player", "result", "position")
 
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    form = CategoryAdminForm
-    list_display = ("name", "get_disciplines_display")
+# @admin.register(PistolSquatResult)
+# class PistolSquatResultAdmin(admin.ModelAdmin):
+#     list_display = (
+#         "player",
+#         "result_1",
+#         "result_2",
+#         "result_3",
+#         "get_max_result",
+#         "get_bw_percentage",
+#         "position",
+#     )
+#     list_filter = ("player__categories",)
+#     search_fields = ("player__name", "player__surname")
+#
+#     def get_max_result(self, obj):
+#         return obj.get_max_result()
+#
+#     get_max_result.short_description = "Max Result"
+#
+#     def get_bw_percentage(self, obj):
+#         return f"{obj.calculate_bw_percentage():.2f}%"
 
-    def get_disciplines_display(self, obj):
-        return ", ".join(obj.get_disciplines())
-
-    get_disciplines_display.short_description = "Konkurencje"
-
-
-@admin.register(SnatchResult)
-class SnatchResultAdmin(admin.ModelAdmin):
-    list_display = ("player", "result", "position")
-
-
-@admin.register(PistolSquatResult)
-class PistolSquatResultAdmin(admin.ModelAdmin):
-    list_display = (
-        "player",
-        "result_1",
-        "result_2",
-        "result_3",
-        "get_max_result",
-        "get_bw_percentage",
-        "position",
-    )
-    list_filter = ("player__categories",)
-    search_fields = ("player__name", "player__surname")
-
-    def get_max_result(self, obj):
-        return obj.get_max_result()
-
-    get_max_result.short_description = "Max Result"
-
-    def get_bw_percentage(self, obj):
-        return f"{obj.calculate_bw_percentage():.2f}%"
-
-    get_bw_percentage.short_description = "%BW"
+    # get_bw_percentage.short_description = "%BW"
 
 
-@admin.register(TGUResult)
-class TGUResultAdmin(admin.ModelAdmin):
-    list_display = (
-        "player",
-        "result_1",
-        "result_2",
-        "result_3",
-        "get_max_result",
-        "get_bw_percentage",
-        "position",
-    )
-    list_filter = ("player__categories",)
-    search_fields = ("player__name", "player__surname")
-
-    def get_max_result(self, obj):
-        return obj.get_max_result()
-
-    get_max_result.short_description = "Max Result"
-
-    def get_bw_percentage(self, obj):
-        return f"{obj.calculate_bw_percentage():.2f}%"
-
-    get_bw_percentage.short_description = "%BW"
-
-
-@admin.register(SeeSawPressResult)
-class SeeSawPressResultAdmin(admin.ModelAdmin):
-    list_display = (
-        "player",
-        "result_left_1",
-        "result_left_2",
-        "result_left_3",
-        "result_right_1",
-        "result_right_2",
-        "result_right_3",
-        "position",
-    )
+# @admin.register(TGUResult)
+# class TGUResultAdmin(admin.ModelAdmin):
+#     list_display = (
+#         "player",
+#         "result_1",
+#         "result_2",
+#         "result_3",
+#         "get_max_result",
+#         "get_bw_percentage",
+#         "position",
+#     )
+#     list_filter = ("player__categories",)
+#     search_fields = ("player__name", "player__surname")
+#
+#     def get_max_result(self, obj):
+#         return obj.get_max_result()
+#
+#     get_max_result.short_description = "Max Result"
+#
+#     def get_bw_percentage(self, obj):
+#         return f"{obj.calculate_bw_percentage():.2f}%"
+#
+#     get_bw_percentage.short_description = "%BW"
 
 
-@admin.register(KBSquatResult)
-class KBSquatResultAdmin(admin.ModelAdmin):
-    list_display = (
-        "player",
-        "get_max_result",
-        "get_result_1",
-        "get_result_2",
-        "get_result_3",
-        "position",
-    )
-
-    def get_max_result(self, obj):
-        return obj.get_max_result()
-
-    get_max_result.short_description = "Max Result"
-
-    def get_result_1(self, obj):
-        return f"L: {obj.result_left_1}, R: {obj.result_right_1}"
-
-    get_result_1.short_description = "Result 1"
-
-    def get_result_2(self, obj):
-        return f"L: {obj.result_left_2}, R: {obj.result_right_2}"
-
-    get_result_2.short_description = "Result 2"
-
-    def get_result_3(self, obj):
-        return f"L: {obj.result_left_3}, R: {obj.result_right_3}"
-
-    get_result_3.short_description = "Result 3"
+# @admin.register(SeeSawPressResult)
+# class SeeSawPressResultAdmin(admin.ModelAdmin):
+#     list_display = (
+#         "player",
+#         "result_left_1",
+#         "result_left_2",
+#         "result_left_3",
+#         "result_right_1",
+#         "result_right_2",
+#         "result_right_3",
+#         "position",
+#     )
 
 
-@admin.register(OverallResult)
-class OverallResultAdmin(admin.ModelAdmin):
-    list_display = (
-        "player",
-        "snatch_points",
-        "tgu_points",
-        "see_saw_press_points",
-        "kb_squat_points",
-        "pistol_squat_points",
-        "tiebreak_points",
-        "total_points",
-        "final_position",
-    )
+# @admin.register(KBSquatResult)
+# class KBSquatResultAdmin(admin.ModelAdmin):
+#     list_display = (
+#         "player",
+#         "get_max_result",
+#         "get_result_1",
+#         "get_result_2",
+#         "get_result_3",
+#         "position",
+#     )
+#
+#     def get_max_result(self, obj):
+#         return obj.get_max_result()
+#
+#     get_max_result.short_description = "Max Result"
+#
+#     def get_result_1(self, obj):
+#         return f"L: {obj.result_left_1}, R: {obj.result_right_1}"
+#
+#     get_result_1.short_description = "Result 1"
+#
+#     def get_result_2(self, obj):
+#         return f"L: {obj.result_left_2}, R: {obj.result_right_2}"
+#
+#     get_result_2.short_description = "Result 2"
+#
+#     def get_result_3(self, obj):
+#         return f"L: {obj.result_left_3}, R: {obj.result_right_3}"
+#
+#     get_result_3.short_description = "Result 3"
+#
+#
+# @admin.register(OverallResult)
+# class OverallResultAdmin(admin.ModelAdmin):
+#     list_display = (
+#         "player",
+#         "snatch_points",
+#         "tgu_points",
+#         "see_saw_press_points",
+#         "kb_squat_points",
+#         "pistol_squat_points",
+#         "tiebreak_points",
+#         "total_points",
+#         "final_position",
+#     )
 
 
 # @admin.register(BestSeeSawPressResult)
