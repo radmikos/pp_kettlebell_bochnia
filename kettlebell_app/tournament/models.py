@@ -379,17 +379,17 @@ def update_overall_results(category):
     disciplines = category.get_disciplines()
     players = Player.objects.filter(categories=category)
 
-    # Reset all results for this category
-    OverallResult.objects.filter(player__in=players).update(
-        snatch_points=0,
-        tgu_points=0,
-        see_saw_press_points=0,
-        kb_squat_points=0,
-        pistol_squat_points=0,
-        tiebreak_points=0,
-        total_points=0,
-        final_position=None,
-    )
+    for player in players:
+        overall_result, created = OverallResult.objects.get_or_create(player=player)
+        overall_result.snatch_points = 0
+        overall_result.tgu_points = 0
+        overall_result.see_saw_press_points = 0
+        overall_result.kb_squat_points = 0
+        overall_result.pistol_squat_points = 0
+        overall_result.tiebreak_points = 0
+        overall_result.total_points = 0
+        overall_result.final_position = None
+        overall_result.save()
 
     discipline_models = {
         SNATCH: SnatchResult,
@@ -407,9 +407,7 @@ def update_overall_results(category):
                 .order_by("-result")
             )
             for position, result in enumerate(results, start=1):
-                overall_result, _ = OverallResult.objects.get_or_create(
-                    player=result.player
-                )
+                overall_result = OverallResult.objects.get(player=result.player)
                 if discipline == SNATCH:
                     overall_result.snatch_points = position
                 elif discipline == TGU:
