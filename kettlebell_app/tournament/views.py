@@ -1,14 +1,8 @@
 from django.shortcuts import render
 
-from .models import (
-    Category,
-    KBSquatResult,
-    OverallResult,
-    Player,
-    SeeSawPressResult,
-    SnatchResult,
-    TGUResult,
-)
+from .forms import StationForm
+from .models import (Category, KBSquatResult, OverallResult, PistolSquatResult,
+                     Player, SeeSawPressResult, SnatchResult, TGUResult)
 
 
 def create_or_update_results(category):
@@ -60,8 +54,6 @@ def update_overall_results(category):
         else:
             overall.snatch_points = 0
 
-        # Powtórz dla pozostałych dyscyplin
-
         overall.calculate_total_points()
         overall.save()
 
@@ -69,11 +61,6 @@ def update_overall_results(category):
 def index(request):
     categories = Category.objects.all()
     return render(request, "index.html", {"categories": categories})
-
-
-from django.shortcuts import render
-
-from .models import Category, OverallResult, Player
 
 
 def category_view(request, category_slug):
@@ -106,20 +93,6 @@ def category_view(request, category_slug):
     }
 
     return render(request, "category_template.html", context)
-
-
-from django.shortcuts import render
-
-from .models import (
-    Category,
-    KBSquatResult,
-    OverallResult,
-    PistolSquatResult,
-    Player,
-    SeeSawPressResult,
-    SnatchResult,
-    TGUResult,
-)
 
 
 def calculate_category_results(request, category_name, template_name):
@@ -179,7 +152,7 @@ def calculate_category_results(request, category_name, template_name):
                 "attempt_3": f"{result.result_left_3:.1f}/{result.result_right_3:.1f}",
             },
         },
-        "pistol_squat": {  # Changed from "pistols_squat" to "pistol_squat"
+        "pistol_squat": {
             "model": PistolSquatResult,
             "calculate": lambda player, result: {
                 "max_result": result.get_max_result(),
@@ -222,12 +195,10 @@ def calculate_category_results(request, category_name, template_name):
 
         overall_results.append(player_results)
 
-    # Calculate positions for each discipline
     for discipline in disciplines:
         results[discipline].sort(key=lambda x: x["max_result"], reverse=True)
         for position, result in enumerate(results[discipline], 1):
             result["position"] = position
-            # Update the overall results with the position
             for overall_result in overall_results:
                 if overall_result["player"] == result["player"]:
                     overall_result[f"{discipline}_place"] = position
@@ -235,7 +206,6 @@ def calculate_category_results(request, category_name, template_name):
                         overall_result.get("total_points", 0) + position
                     )
 
-    # Sort and assign final positions for overall results
     overall_results.sort(key=lambda x: x.get("total_points", 0))
     for position, result in enumerate(overall_results, 1):
         result["total_place"] = position
@@ -327,3 +297,63 @@ def nagroda_specjalna(request):
     return calculate_category_results(
         request, "Nagroda_specjalna", "nagroda-specjalna.html"
     )
+
+
+def generate_start_list(request):
+    if request.method == "POST":
+        form = StationForm(request.POST)
+        if form.is_valid():
+            category = form.cleaned_data["category"]
+            stations = form.cleaned_data["stations"]
+
+            players = Player.objects.filter(categories__name__iexact=category)
+            player_count = players.count()
+
+            if stations == 0:
+                form.add_error("stations", "Liczba stanowisk musi być większa od 0.")
+                return render(request, "station_form.html", {"form": form})
+
+            if player_count == 0:
+                return render(
+                    request,
+                    "start_list.html",
+                    {
+                        "message": f"Brak zawodniczek w kategorii {category}.",
+                        "category": category,
+                        "stations": stations,
+                    },
+                )
+
+            kb_squat_results = KBSquatResult.objects.filter(player__in=players)
+            seesaw_press_results = SeeSawPressResult.objects.filter(player__in=players)
+            tgu_results = TGUResult.objects.filter(player__in=players)
+            snatch_results = SnatchResult.objects.filter(player__in=players)
+            pistol_squat_results = PistolSquatResult.objects.filter(player__in=players)
+
+            players_per_station = (player_count + stations - 1) // stations
+            stations_list = [
+                {
+                    "station_number": i + 1,
+                    "players": players[i : i + players_per_station],
+                }
+                for i in range(0, player_count, players_per_station)
+            ]
+
+            return render(
+                request,
+                "amator-kobiety-do-65kg.html",
+                {
+                    "stations_list": stations_list,
+                    "stations": stations,
+                    "category_name": category,
+                    "kb_squat_results": kb_squat_results,
+                    "see_saw_results": seesaw_press_results,
+                    "tgu_results": tgu_results,
+                    "snatch_results": snatch_results,
+                    "pistol_squat_results": pistol_squat_results,
+                },
+            )
+    else:
+        form = StationForm()
+
+    return render(request, "station_form.html", {"form": form})
