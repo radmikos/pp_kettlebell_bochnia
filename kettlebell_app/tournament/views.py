@@ -299,14 +299,19 @@ def nagroda_specjalna(request):
     )
 
 
+from django.shortcuts import render
+from .forms import StationForm
+from .models import Player, Category
+
 def generate_start_list(request):
     if request.method == "POST":
         form = StationForm(request.POST)
         if form.is_valid():
-            category = form.cleaned_data["category"]
+            category_name = form.cleaned_data["category"]
             stations = form.cleaned_data["stations"]
 
-            players = Player.objects.filter(categories__name__iexact=category)
+            category = Category.objects.get(name=category_name)
+            players = Player.objects.filter(categories=category).order_by('surname', 'name')
             player_count = players.count()
 
             if stations == 0:
@@ -318,39 +323,28 @@ def generate_start_list(request):
                     request,
                     "start_list.html",
                     {
-                        "message": f"Brak zawodniczek w kategorii {category}.",
-                        "category": category,
+                        "message": f"Brak zawodników w kategorii {category_name}.",
+                        "category": category_name,
                         "stations": stations,
                     },
                 )
-
-            kb_squat_results = KBSquatResult.objects.filter(player__in=players)
-            seesaw_press_results = SeeSawPressResult.objects.filter(player__in=players)
-            tgu_results = TGUResult.objects.filter(player__in=players)
-            snatch_results = SnatchResult.objects.filter(player__in=players)
-            pistol_squat_results = PistolSquatResult.objects.filter(player__in=players)
 
             players_per_station = (player_count + stations - 1) // stations
             stations_list = [
                 {
                     "station_number": i + 1,
-                    "players": players[i : i + players_per_station],
+                    "players": players[i * players_per_station : (i + 1) * players_per_station],
                 }
-                for i in range(0, player_count, players_per_station)
+                for i in range(stations)
             ]
 
             return render(
                 request,
-                "amator-kobiety-do-65kg.html",
+                "start_list.html",
                 {
                     "stations_list": stations_list,
                     "stations": stations,
-                    "category_name": category,
-                    "kb_squat_results": kb_squat_results,
-                    "see_saw_results": seesaw_press_results,
-                    "tgu_results": tgu_results,
-                    "snatch_results": snatch_results,
-                    "pistol_squat_results": pistol_squat_results,
+                    "category": category_name,
                 },
             )
     else:

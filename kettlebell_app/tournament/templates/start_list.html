@@ -1,56 +1,65 @@
-<h1>Start List for {{ category }}</h1>
-<p>Number of Stations: {{ stations }}</p>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista startowa - {{ category }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista startowa dla kategorii {{ category }}</h1>
 
-{% if stations_list %}
-    {% for station in stations_list %}
-        <h2>Station {{ station.station_number }}</h2>
-        <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Surname</th>
-                    <th>KB Squat Result</th>
-                    <th>See Saw Press Result</th>
-                    <th>TGU Result</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for player in station.players %}
-                <tr>
-                    <td>{{ player.name }}</td>
-                    <td>{{ player.surname }}</td>
-                    <td>
-                        {% with kb_squat_results|get_item:player.id as kb_squat %}
-                            {% if kb_squat %}
-                                {{ kb_squat.get_max_result }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        {% endwith %}
-                    </td>
-                    <td>
-                        {% with seesaw_press_results|get_item:player.id as seesaw_press %}
-                            {% if seesaw_press %}
-                                {{ seesaw_press.get_max_result }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        {% endwith %}
-                    </td>
-                    <td>
-                        {% with tgu_results|get_item:player.id as tgu %}
-                            {% if tgu %}
-                                {{ tgu.get_max_result }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        {% endwith %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endfor %}
-{% else %}
-    <p>No players found for this category.</p>
-{% endif %}
+    <h2>Liczba stanowisk: {{ stations }}</h2>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% else %}
+        {% for station in stations_list %}
+            <h3>Stanowisko {{ station.station_number }}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nazwisko</th>
+                        <th>Imię</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in station.players %}
+                        <tr>
+                            <td>{{ player.surname }}</td>
+                            <td>{{ player.name }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

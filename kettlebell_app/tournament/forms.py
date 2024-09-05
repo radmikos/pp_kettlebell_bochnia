@@ -1,12 +1,16 @@
 from django import forms
-
+from .models import Category
 
 class StationForm(forms.Form):
     category = forms.ChoiceField(
-        choices=[
-            ("amator_kobiety_do_65kg", "Amator Kobiety do 65kg"),
-            ("amator_kobiety_powyzej_65kg", "Amator Kobiety powyżej 65kg"),
-            # Add more categories as needed
-        ]
+        choices=[],
+        label="Kategoria"
     )
-    stations = forms.IntegerField(min_value=1, label="Number of Stations")
+    stations = forms.IntegerField(min_value=1, label="Liczba stanowisk")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].choices = [
+            (category.name, category.name.replace('_', ' '))
+            for category in Category.objects.all()
+        ]

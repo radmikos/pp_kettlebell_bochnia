@@ -3,45 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona główna zawodów</title>
+    <title>Puchar Polski Kettbell Bochnia 2024 - Wyniki na żywo</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
-        header { background: #f4f4f4; padding: 1rem; text-align: center; }
-        main { padding: 2rem; }
-        ul { list-style-type: none; padding: 0; }
-        li { margin-bottom: 10px; }
-        a { color: #333; text-decoration: none; }
-        a:hover { color: #666; }
-        footer { background: #333; color: #fff; text-align: center; padding: 1rem; position: fixed; bottom: 0; width: 100%; }
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            background-color: #1a1a1a;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #ffffff;
+        }
+
+        header {
+            background-color: #eb9534;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        nav {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        nav a {
+            margin: 0 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+            background-color: #333333;
+            border-radius: 5px;
+        }
+
+        nav a:hover {
+            background-color: #d4af37;
+        }
+
+        main {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        /* Buttons in grid layout */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 2rem;
+        }
+
+        .category-grid button {
+            background-color: #eb9534; /* Ciemnożółty kolor dla buttonów */
+            color: white;
+            border: none;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .category-grid button:hover {
+            background-color: #b8860b;
+        }
+
+        /* Embedded video styles */
+        .live-stream iframe {
+            width: 100%;
+            height: 500px;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+        }
+
+        .live-stream h2 {
+            color: #d4af37;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            background-color: #eb9534;
+            color: #000;
+            text-align: center;
+            padding: 1rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        /* Spacing for the Kontakt link */
+        .contact-link {
+            margin-top: 3rem;
+        }
+
     </style>
 </head>
 <body>
     <header>
-        <h1>Witaj na stronie zawodów</h1>
+        <h1>Puchar Polski Kettbell Bochnia 2024 - Wyniki na żywo</h1>
     </header>
 
     <main>
+        <!-- Section for live stream -->
+        <div class="live-stream">
+            <h2>TRANSMISJA NA ŻYWO</h2>
+            <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+
         <section>
             <h2>Kategorie:</h2>
-            <ul>
-                <li><a href="{% url 'amator_kobiety_do_65kg' %}">Amator Kobiety do 65kg</a></li>
-                <li><a href="{% url 'amator_kobiety_powyzej_65kg' %}">Amator Kobiety powyżej 65kg</a></li>
-                <li><a href="{% url 'amator_mezczyzni_do_85kg' %}">Amator Mężczyźni do 85kg</a></li>
-                <li><a href="{% url 'amator_mezczyzni_powyzej_85kg' %}">Amator Mężczyźni powyżej 85kg</a></li>
-                <li><a href="{% url 'masters_kobiety' %}">Masters Kobiety</a></li>
-                <li><a href="{% url 'masters_mezczyzni' %}">Masters Mężczyźni</a></li>
-                <li><a href="{% url 'najlepsza_bochnianka' %}">Najlepsza Bochnianka</a></li>
-                <li><a href="{% url 'najlepszy_bochnianin' %}">Najlepszy Bochnianin</a></li>
-                <li><a href="{% url 'pro_kobiety' %}">Pro Kobiety</a></li>
-                <li><a href="{% url 'pro_mezczyzni_do_85kg' %}">Pro Mężczyźni do 85kg</a></li>
-                <li><a href="{% url 'pro_mezczyzni_powyzej_85kg' %}">Pro Mężczyźni powyżej 85kg</a></li>
-                <li><a href="{% url 'nagroda_specjalna' %}">Nagroda Specjalna</a></li>
-            </ul>
+            <div class="category-grid">
+                <button onclick="location.href='{% url 'amator_kobiety_do_65kg' %}'">Amator Kobiety do 65kg</button>
+                <button onclick="location.href='{% url 'amator_kobiety_powyzej_65kg' %}'">Amator Kobiety powyżej 65kg</button>
+                <button onclick="location.href='{% url 'amator_mezczyzni_do_85kg' %}'">Amator Mężczyźni do 85kg</button>
+                <button onclick="location.href='{% url 'amator_mezczyzni_powyzej_85kg' %}'">Amator Mężczyźni powyżej 85kg</button>
+                <button onclick="location.href='{% url 'masters_kobiety' %}'">Masters Kobiety</button>
+                <button onclick="location.href='{% url 'masters_mezczyzni' %}'">Masters Mężczyźni</button>
+                <button onclick="location.href='{% url 'najlepsza_bochnianka' %}'">Najlepsza Bochnianka</button>
+                <button onclick="location.href='{% url 'najlepszy_bochnianin' %}'">Najlepszy Bochnianin</button>
+                <button onclick="location.href='{% url 'pro_kobiety' %}'">Pro Kobiety</button>
+                <button onclick="location.href='{% url 'pro_mezczyzni_do_85kg' %}'">Pro Mężczyźni do 85kg</button>
+                <button onclick="location.href='{% url 'pro_mezczyzni_powyzej_85kg' %}'">Pro Mężczyźni powyżej 85kg</button>
+                <button onclick="location.href='{% url 'nagroda_specjalna' %}'">Nagroda Specjalna</button>
+            </div>
         </section>
+
+        <!-- Contact link section -->
+        <nav class="contact-link">
+            <a href="#">Kontakt</a>
+        </nav>
     </main>
 
     <footer>
-        <p>&copy; 2023 Nazwa Twoich Zawodów. Wszelkie prawa zastrzeżone.</p>
+        <p>&copy; 2024 Puchar Polski Kettlebell Bochnia. Wszelkie prawa zastrzeżone.</p>
     </footer>
 </body>
 </html>
