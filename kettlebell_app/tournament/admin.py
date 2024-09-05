@@ -2,20 +2,10 @@ from django import forms
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 
-from .models import (
-    AVAILABLE_DISCIPLINES,
-    BestKBSquatResult,
-    BestSeeSawPressResult,
-    Category,
-    KBSquatResult,
-    OverallResult,
-    PistolSquatResult,
-    Player,
-    SeeSawPressResult,
-    SnatchResult,
-    SportClub,
-    TGUResult,
-)
+from .models import (AVAILABLE_DISCIPLINES, BestKBSquatResult,
+                     BestSeeSawPressResult, Category, KBSquatResult,
+                     OverallResult, PistolSquatResult, Player,
+                     SeeSawPressResult, SnatchResult, SportClub, TGUResult)
 from .resources import PlayerExportResource, PlayerImportResource
 
 
@@ -175,9 +165,6 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(SnatchResult)
 class SnatchResultAdmin(admin.ModelAdmin):
     list_display = ("player", "result", "position")
-
-
-from .models import PistolSquatResult
 
 
 @admin.register(PistolSquatResult)
