@@ -5,6 +5,7 @@ DEBUG = False
 SECRET_KEY = "REMOVED"
 
 ALLOWED_HOSTS = ["ppkettlebell.toadres.pl", "localhost"]
+CSRF_TRUSTED_ORIGINS = ["https://ppkettlebell.toadres.pl"]
 
 LOG_PATH = "../logs"
 DBBACKUP_PATH = "../dbbackup"
