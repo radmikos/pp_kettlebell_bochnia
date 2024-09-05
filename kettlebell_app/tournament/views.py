@@ -151,11 +151,6 @@ def calculate_category_results(request, category_name, template_name):
             "model": SnatchResult,
             "calculate": lambda player, result: {
                 "max_result": result.result or 0,
-                "bw_percentage": round(
-                    (player.snatch_kettlebell_weight / player.weight) * 100, 2
-                )
-                if player.weight and player.snatch_kettlebell_weight
-                else 0,
                 "kettlebell_weight": player.snatch_kettlebell_weight,
                 "repetitions": player.snatch_repetitions,
             },

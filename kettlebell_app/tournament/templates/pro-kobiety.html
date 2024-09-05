@@ -139,41 +139,6 @@
         </tbody>
     </table>
 
-    {% if 'see_saw_press' in disciplines %}
-    <h2>Wyniki See Saw Press</h2>
-    <table>
-        <thead>
-            <tr>
-                <th class="place-column">Miejsce</th>
-                <th>Nazwisko</th>
-                <th>Imię</th>
-                <th class="club-column">Klub</th>
-                <th class="weight-column">Waga ciała</th>
-                <th>Próba I (L/P)</th>
-                <th>Próba II (L/P)</th>
-                <th>Próba III (L/P)</th>
-                <th class="result-column">Wynik Max</th>
-                <th class="result-column">%BW</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in see_saw_results %}
-            <tr>
-                <td class="place-column">{{ result.position }}</td>
-                <td>{{ result.player.surname }}</td>
-                <td>{{ result.player.name }}</td>
-                <td class="club-column">{{ result.player.club.name }}</td>
-                <td class="weight-column">{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
-                <td>{{ result.attempt_1 }}</td>
-                <td>{{ result.attempt_2 }}</td>
-                <td>{{ result.attempt_3 }}</td>
-                <td class="result-column">{{ result.max_result|floatformat:1 }}</td>
-                <td class="result-column">{{ result.bw_percentage|default_if_none:"-"|floatformat:1 }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
 
     {% if 'tgu' in disciplines %}
     <h2>Wyniki TGU</h2>
@@ -205,6 +170,41 @@
                 <td class="result-column">{{ result.attempt_3|floatformat:1 }}</td>
                 <td class="result-column">{{ result.max_result|floatformat:1 }}</td>
                 <td class="result-column">{{ result.bw_percentage|floatformat:1 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% if 'see_saw_press' in disciplines %}
+    <h2>Wyniki See Saw Press</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="place-column">Miejsce</th>
+                <th>Nazwisko</th>
+                <th>Imię</th>
+                <th class="club-column">Klub</th>
+                <th class="weight-column">Waga ciała</th>
+                <th>Próba I (L/P)</th>
+                <th>Próba II (L/P)</th>
+                <th>Próba III (L/P)</th>
+                <th class="result-column">Wynik Max</th>
+                <th class="result-column">%BW</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in see_saw_results %}
+            <tr>
+                <td class="place-column">{{ result.position }}</td>
+                <td>{{ result.player.surname }}</td>
+                <td>{{ result.player.name }}</td>
+                <td class="club-column">{{ result.player.club.name }}</td>
+                <td class="weight-column">{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
+                <td>{{ result.attempt_1 }}</td>
+                <td>{{ result.attempt_2 }}</td>
+                <td>{{ result.attempt_3 }}</td>
+                <td class="result-column">{{ result.max_result|floatformat:1 }}</td>
+                <td class="result-column">{{ result.bw_percentage|default_if_none:"-"|floatformat:1 }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -247,7 +247,7 @@
     </table>
     {% endif %}
 
-    {% if 'pistols_squat' in disciplines %}
+    {% if 'pistol_squat' in disciplines %}
     <h2>Wyniki Pistol Squat</h2>
     <table>
         <thead>
@@ -282,6 +282,7 @@
         </tbody>
     </table>
     {% endif %}
+
     {% if 'snatch' in disciplines %}
     <h2>Wyniki Snatch</h2>
     <table>
@@ -295,7 +296,6 @@
                 <th class="weight-column">Waga odważnika</th>
                 <th class="result-column">Ilość powtórzeń</th>
                 <th class="result-column">Waga Odważnika * il. powtórzeń</th>
-                <th class="result-column">%BW</th>
             </tr>
         </thead>
         <tbody>
@@ -309,7 +309,6 @@
                 <td class="weight-column">{{ result.kettlebell_weight }}</td>
                 <td class="result-column">{{ result.repetitions }}</td>
                 <td class="result-column">{{ result.max_result }}</td>
-                <td class="result-column">{{ result.bw_percentage|default_if_none:"-" }}</td>
             </tr>
             {% endfor %}
         </tbody>
