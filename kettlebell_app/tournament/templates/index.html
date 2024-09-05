@@ -123,23 +123,45 @@
             <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
 
-        <section>
-            <h2>Kategorie:</h2>
-            <div class="category-grid">
-                <button onclick="location.href='{% url 'amator_kobiety_do_65kg' %}'">Amator Kobiety do 65kg</button>
-                <button onclick="location.href='{% url 'amator_kobiety_powyzej_65kg' %}'">Amator Kobiety powyżej 65kg</button>
-                <button onclick="location.href='{% url 'amator_mezczyzni_do_85kg' %}'">Amator Mężczyźni do 85kg</button>
-                <button onclick="location.href='{% url 'amator_mezczyzni_powyzej_85kg' %}'">Amator Mężczyźni powyżej 85kg</button>
-                <button onclick="location.href='{% url 'masters_kobiety' %}'">Masters Kobiety</button>
-                <button onclick="location.href='{% url 'masters_mezczyzni' %}'">Masters Mężczyźni</button>
-                <button onclick="location.href='{% url 'najlepsza_bochnianka' %}'">Najlepsza Bochnianka</button>
-                <button onclick="location.href='{% url 'najlepszy_bochnianin' %}'">Najlepszy Bochnianin</button>
-                <button onclick="location.href='{% url 'pro_kobiety' %}'">Pro Kobiety</button>
-                <button onclick="location.href='{% url 'pro_mezczyzni_do_85kg' %}'">Pro Mężczyźni do 85kg</button>
-                <button onclick="location.href='{% url 'pro_mezczyzni_powyzej_85kg' %}'">Pro Mężczyźni powyżej 85kg</button>
-                <button onclick="location.href='{% url 'nagroda_specjalna' %}'">Nagroda Specjalna</button>
-            </div>
-        </section>
+<section>
+    <h2>Kategorie:</h2>
+
+    <div class="category-group">
+        <h3>Kobiety</h3>
+        <div class="category-grid">
+            <button onclick="location.href='{% url 'amator_kobiety_do_65kg' %}'">Amator Kobiety do 65kg</button>
+            <button onclick="location.href='{% url 'amator_kobiety_powyzej_65kg' %}'">Amator Kobiety powyżej 65kg</button>
+            <button onclick="location.href='{% url 'masters_kobiety' %}'">Masters Kobiety</button>
+            <button onclick="location.href='{% url 'pro_kobiety' %}'">Pro Kobiety</button>
+        </div>
+    </div>
+
+    <div class="category-group">
+        <h3>Mężczyźni</h3>
+        <div class="category-grid">
+            <button onclick="location.href='{% url 'amator_mezczyzni_do_85kg' %}'">Amator Mężczyźni do 85kg</button>
+            <button onclick="location.href='{% url 'amator_mezczyzni_powyzej_85kg' %}'">Amator Mężczyźni powyżej 85kg</button>
+            <button onclick="location.href='{% url 'masters_mezczyzni' %}'">Masters Mężczyźni</button>
+            <button onclick="location.href='{% url 'pro_mezczyzni_do_85kg' %}'">Pro Mężczyźni do 85kg</button>
+            <button onclick="location.href='{% url 'pro_mezczyzni_powyzej_85kg' %}'">Pro Mężczyźni powyżej 85kg</button>
+        </div>
+    </div>
+
+    <div class="category-group">
+        <h3>Bochnia</h3>
+        <div class="category-grid">
+            <button onclick="location.href='{% url 'najlepsza_bochnianka' %}'">Najlepsza Bochnianka</button>
+            <button onclick="location.href='{% url 'najlepszy_bochnianin' %}'">Najlepszy Bochnianin</button>
+        </div>
+    </div>
+
+    <div class="category-group">
+        <h3>Inne</h3>
+        <div class="category-grid">
+            <button onclick="location.href='{% url 'nagroda_specjalna' %}'">Nagroda Specjalna</button>
+        </div>
+    </div>
+</section>
 
         <!-- Contact link section -->
         <nav class="contact-link">
