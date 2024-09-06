@@ -96,10 +96,32 @@
         .club-column {
             font-style: italic;
         }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .return-button {
+            background-color: #ffd700;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
-    <h1>{{ category_name }}</h1>
+    <div class="header-container">
+        <h1>{{ category_name }}</h1>
+        <a href="/" class="return-button">Powrót do strony głównej</a>
+    </div>
 
     <h2>Wyniki ogólne</h2>
 
