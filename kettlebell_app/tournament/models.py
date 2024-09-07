@@ -396,6 +396,8 @@ class OverallResult(models.Model):
 
 
 from django.db.models import Case, When, F, FloatField
+from django.db.models import Case, When, F, FloatField
+
 
 def update_overall_results(category):
     disciplines = category.get_disciplines()
@@ -426,30 +428,21 @@ def update_overall_results(category):
             model = discipline_models[discipline]
             if discipline == SNATCH:
                 results = model.objects.filter(player__in=players).order_by("-result")
-            elif discipline in [TGU, PISTOL_SQUAT]:
-                results = (
-                    model.objects.filter(player__in=players)
-                    .annotate(
-                        max_result=Greatest("result_1", "result_2", "result_3"),
-                        bw_percentage=Case(
-                            When(player__weight__gt=0, then=F('max_result') * 100.0 / F('player__weight')),
-                            default=0,
-                            output_field=FloatField()
-                        )
+            else:
+                if discipline in [TGU, PISTOL_SQUAT]:
+                    max_result = Greatest("result_1", "result_2", "result_3")
+                else:  # SEE_SAW_PRESS, KB_SQUAT
+                    max_result = Greatest(
+                        F("result_left_1") + F("result_right_1"),
+                        F("result_left_2") + F("result_right_2"),
+                        F("result_left_3") + F("result_right_3"),
                     )
-                    .order_by('-bw_percentage')
-                )
-            elif discipline in [SEE_SAW_PRESS, KB_SQUAT]:
+
                 results = (
                     model.objects.filter(player__in=players)
                     .annotate(
-                        max_result=Greatest(
-                            F("result_left_1") + F("result_right_1"),
-                            F("result_left_2") + F("result_right_2"),
-                            F("result_left_3") + F("result_right_3"),
-                        ),
                         bw_percentage=Case(
-                            When(player__weight__gt=0, then=F('max_result') * 100.0 / F('player__weight')),
+                            When(player__weight__gt=0, then=max_result * 100.0 / F('player__weight')),
                             default=0,
                             output_field=FloatField()
                         )
