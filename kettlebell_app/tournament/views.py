@@ -228,20 +228,22 @@ def calculate_category_results(request, category_name, template_name):
     for discipline in disciplines:
         if discipline == "snatch":
             results[discipline].sort(key=lambda x: (x["max_result"] is not None, x["max_result"]), reverse=True)
+            key_for_comparison = "max_result"
         else:
             results[discipline].sort(key=lambda x: (x["bw_percentage"] is not None, x["bw_percentage"]), reverse=True)
+            key_for_comparison = "bw_percentage"
 
         current_position = 1
         previous_result = None
+        same_result_count = 0
 
         for index, result in enumerate(results[discipline]):
             if previous_result is not None:
-                if discipline == "snatch":
-                    if result["max_result"] != previous_result["max_result"]:
-                        current_position = index + 1
+                if result[key_for_comparison] != previous_result[key_for_comparison]:
+                    current_position += same_result_count + 1
+                    same_result_count = 0
                 else:
-                    if result["bw_percentage"] != previous_result["bw_percentage"]:
-                        current_position = index + 1
+                    same_result_count += 1
 
             result["position"] = current_position
             previous_result = result
