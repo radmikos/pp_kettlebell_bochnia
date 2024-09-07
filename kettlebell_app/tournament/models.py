@@ -434,7 +434,7 @@ def update_overall_results(category):
                             output_field=FloatField()
                         )
                     )
-                    .order_by('-bw_percentage')
+                    .order_by(F('bw_percentage').desc(nulls_last=True))
                 )
             elif discipline in [SEE_SAW_PRESS, KB_SQUAT]:
                 results = (
@@ -450,7 +450,7 @@ def update_overall_results(category):
                             output_field=FloatField()
                         )
                     )
-                    .order_by('-bw_percentage')
+                    .order_by(F('bw_percentage').desc(nulls_last=True))
                 )
 
             for position, result in enumerate(results, start=1):
