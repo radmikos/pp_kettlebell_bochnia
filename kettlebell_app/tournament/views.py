@@ -150,8 +150,7 @@ def calculate_category_results(request, category_name, template_name):
         "snatch": {
             "model": SnatchResult,
             "calculate": lambda player, result: {
-                "max_result": result.result or 0,
-                "bw_percentage": round((result.result / player.weight) * 100, 2) if player.weight else 0,
+                "max_result": result.result if result.result is not None else 0,
                 "kettlebell_weight": player.snatch_kettlebell_weight,
                 "repetitions": player.snatch_repetitions,
             },
@@ -203,7 +202,6 @@ def calculate_category_results(request, category_name, template_name):
 
     for player in players:
         player_results = {"player": player, "weight": player.weight}
-        total_points = 0
 
         for discipline in disciplines:
             config = discipline_configs.get(discipline)
@@ -229,9 +227,10 @@ def calculate_category_results(request, category_name, template_name):
 
     for discipline in disciplines:
         if discipline == "snatch":
-            results[discipline].sort(key=lambda x: x["max_result"], reverse=True)
+            results[discipline].sort(key=lambda x: (x["max_result"] is not None, x["max_result"]), reverse=True)
         else:
-            results[discipline].sort(key=lambda x: x["bw_percentage"], reverse=True)
+            results[discipline].sort(key=lambda x: (x["bw_percentage"] is not None, x["bw_percentage"]), reverse=True)
+
         current_position = 1
         previous_result = None
         for index, result in enumerate(results[discipline]):
