@@ -228,12 +228,18 @@ def calculate_category_results(request, category_name, template_name):
         overall_results.append(player_results)
 
     for discipline in disciplines:
-        results[discipline].sort(key=lambda x: x["bw_percentage"], reverse=True)
+        if discipline == "snatch":
+            results[discipline].sort(key=lambda x: x["max_result"], reverse=True)
+        else:
+            results[discipline].sort(key=lambda x: x["bw_percentage"], reverse=True)
         current_position = 1
         previous_result = None
         for index, result in enumerate(results[discipline]):
-            if previous_result is not None and result["bw_percentage"] != previous_result["bw_percentage"]:
-                current_position = index + 1
+            if previous_result is not None:
+                if discipline == "snatch" and result["max_result"] != previous_result["max_result"]:
+                    current_position = index + 1
+                elif discipline != "snatch" and result["bw_percentage"] != previous_result["bw_percentage"]:
+                    current_position = index + 1
             result["position"] = current_position
             for overall_result in overall_results:
                 if overall_result["player"] == result["player"]:
