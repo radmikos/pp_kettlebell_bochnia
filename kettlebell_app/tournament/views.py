@@ -235,18 +235,15 @@ def calculate_category_results(request, category_name, template_name):
 
         current_position = 1
         previous_result = None
-        same_result_count = 0
+        position_count = 0
 
         for index, result in enumerate(results[discipline]):
-            if previous_result is not None:
-                if result[key_for_comparison] != previous_result[key_for_comparison]:
-                    current_position += same_result_count + 1
-                    same_result_count = 0
-                else:
-                    same_result_count += 1
+            if previous_result is None or result[key_for_comparison] != previous_result[key_for_comparison]:
+                current_position = position_count + 1
 
             result["position"] = current_position
             previous_result = result
+            position_count += 1
 
     # Obliczanie overall_results
     for player_result in overall_results:
