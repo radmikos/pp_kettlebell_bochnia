@@ -233,18 +233,38 @@ def calculate_category_results(request, category_name, template_name):
 
         current_position = 1
         previous_result = None
+        same_result_count = 0
+
         for index, result in enumerate(results[discipline]):
             if previous_result is not None:
-                if discipline == "snatch" and result["max_result"] != previous_result["max_result"]:
-                    current_position = index + 1
-                elif discipline != "snatch" and result["bw_percentage"] != previous_result["bw_percentage"]:
-                    current_position = index + 1
+                if discipline == "snatch":
+                    if result["max_result"] != previous_result["max_result"]:
+                        current_position = index + 1 - same_result_count
+                        same_result_count = 0
+                    else:
+                        same_result_count += 1
+                else:
+                    if result["bw_percentage"] != previous_result["bw_percentage"]:
+                        current_position = index + 1 - same_result_count
+                        same_result_count = 0
+                    else:
+                        same_result_count += 1
+
             result["position"] = current_position
-            for overall_result in overall_results:
-                if overall_result["player"] == result["player"]:
-                    overall_result[f"{discipline}_place"] = current_position
-                    overall_result["total_points"] = overall_result.get("total_points", 0) + current_position
             previous_result = result
+
+    # Obliczanie overall_results
+    for player_result in overall_results:
+        player = player_result["player"]
+        player_result["total_points"] = 0
+
+        for discipline in disciplines:
+            discipline_result = next((r for r in results[discipline] if r["player"] == player), None)
+            if discipline_result:
+                player_result[f"{discipline}_place"] = discipline_result["position"]
+                player_result["total_points"] += discipline_result["position"]
+            else:
+                player_result[f"{discipline}_place"] = 0
 
     overall_results.sort(key=lambda x: (x.get("total_points", 0), not x["player"].tiebreak))
     current_position = 1
