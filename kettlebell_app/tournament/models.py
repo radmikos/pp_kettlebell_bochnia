@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models import F
 from django.db.models.functions import Greatest
+from django.db.models import F, ExpressionWrapper, FloatField
+from django.db.models.functions import Greatest
 
 # Discipline constants
 SNATCH = "snatch"
@@ -75,6 +77,9 @@ class Player(models.Model):
     tiebreak = models.BooleanField(default=False)
 
     _updating_results = False
+
+    def calculate_bw_percentage(self, weight):
+        return (weight / self.weight) * 100 if self.weight else 0
 
     def update_results(self):
         if self._updating_results:
@@ -223,12 +228,13 @@ class TGUResult(models.Model):
     def get_max_result(self):
         return max(self.result_1 or 0, self.result_2 or 0, self.result_3 or 0)
 
+    # def calculate_bw_percentage(self):
+    #     if self.player.weight:
+    #         max_result = self.get_max_result()
+    #         return (max_result / self.player.weight) * 100
+    #     return 0
     def calculate_bw_percentage(self):
-        if self.player.weight:
-            max_result = self.get_max_result()
-            return (max_result / self.player.weight) * 100
-        return 0
-
+        return self.player.calculate_bw_percentage(self.get_max_result())
 
 class PistolSquatResult(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -243,12 +249,13 @@ class PistolSquatResult(models.Model):
     def get_max_result(self):
         return max(self.result_1 or 0, self.result_2 or 0, self.result_3 or 0)
 
+    # def calculate_bw_percentage(self):
+    #     if self.player.weight:
+    #         max_result = self.get_max_result()
+    #         return (max_result / self.player.weight) * 100
+    #     return 0
     def calculate_bw_percentage(self):
-        if self.player.weight:
-            max_result = self.get_max_result()
-            return (max_result / self.player.weight) * 100
-        return 0
-
+        return self.player.calculate_bw_percentage(self.get_max_result())
 
 class SeeSawPressResult(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -281,7 +288,8 @@ class SeeSawPressResult(models.Model):
             else 0,
         ]
         return max(valid_attempts)
-
+    def calculate_bw_percentage(self):
+        return self.player.calculate_bw_percentage(self.get_max_result())
 
 class BestSeeSawPressResult(models.Model):
     player = models.OneToOneField(Player, on_delete=models.CASCADE)
@@ -333,6 +341,9 @@ class KBSquatResult(models.Model):
             else 0,
         ]
         return max(valid_attempts)
+
+    def calculate_bw_percentage(self):
+        return self.player.calculate_bw_percentage(self.get_max_result())
 
     def get_attempt_result(self, attempt_number):
         left = getattr(self, f"result_left_{attempt_number}")
@@ -416,8 +427,14 @@ def update_overall_results(category):
             elif discipline in [TGU, PISTOL_SQUAT]:
                 results = (
                     model.objects.filter(player__in=players)
-                    .annotate(max_result=Greatest("result_1", "result_2", "result_3"))
-                    .order_by("-max_result")
+                    .annotate(
+                        max_result=Greatest("result_1", "result_2", "result_3"),
+                        bw_percentage=ExpressionWrapper(
+                            F('max_result') * 100 / F('player__weight'),
+                            output_field=FloatField()
+                        )
+                    )
+                    .order_by('-bw_percentage')
                 )
             elif discipline in [SEE_SAW_PRESS, KB_SQUAT]:
                 results = (
@@ -427,9 +444,13 @@ def update_overall_results(category):
                             F("result_left_1") + F("result_right_1"),
                             F("result_left_2") + F("result_right_2"),
                             F("result_left_3") + F("result_right_3"),
+                        ),
+                        bw_percentage=ExpressionWrapper(
+                            F('max_result') * 100 / F('player__weight'),
+                            output_field=FloatField()
                         )
                     )
-                    .order_by("-max_result")
+                    .order_by('-bw_percentage')
                 )
 
             for position, result in enumerate(results, start=1):
