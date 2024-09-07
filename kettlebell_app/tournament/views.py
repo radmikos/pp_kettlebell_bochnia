@@ -237,7 +237,7 @@ def calculate_category_results(request, category_name, template_name):
         overall_results.append(player_results)
 
     for discipline in disciplines:
-        results[discipline].sort(key=lambda x: x["bw_percentage"], reverse=True)
+        results[discipline].sort(key=lambda x: x["max_result"], reverse=True)
         current_position = 1
         previous_result = None
         for index, result in enumerate(results[discipline]):
