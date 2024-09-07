@@ -233,22 +233,15 @@ def calculate_category_results(request, category_name, template_name):
 
         current_position = 1
         previous_result = None
-        same_result_count = 0
 
         for index, result in enumerate(results[discipline]):
             if previous_result is not None:
                 if discipline == "snatch":
                     if result["max_result"] != previous_result["max_result"]:
-                        current_position = index + 1 - same_result_count
-                        same_result_count = 0
-                    else:
-                        same_result_count += 1
+                        current_position = index + 1
                 else:
                     if result["bw_percentage"] != previous_result["bw_percentage"]:
-                        current_position = index + 1 - same_result_count
-                        same_result_count = 0
-                    else:
-                        same_result_count += 1
+                        current_position = index + 1
 
             result["position"] = current_position
             previous_result = result
@@ -270,7 +263,8 @@ def calculate_category_results(request, category_name, template_name):
     current_position = 1
     previous_score = None
     for index, result in enumerate(overall_results):
-        result["final_score"] = result.get("total_points", 0) - 0.5 if result["player"].tiebreak else result.get("total_points", 0)
+        result["final_score"] = result.get("total_points", 0) - 0.5 if result["player"].tiebreak else result.get(
+            "total_points", 0)
         if previous_score is not None and result["final_score"] != previous_score:
             current_position = index + 1
         result["total_place"] = current_position
