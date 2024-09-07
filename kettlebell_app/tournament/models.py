@@ -395,6 +395,8 @@ class OverallResult(models.Model):
         return f"{self.player} - Total: {self.total_points:.1f}"
 
 
+from django.db.models import Case, When, F, FloatField
+
 def update_overall_results(category):
     disciplines = category.get_disciplines()
     players = Player.objects.filter(categories=category)
@@ -429,12 +431,13 @@ def update_overall_results(category):
                     model.objects.filter(player__in=players)
                     .annotate(
                         max_result=Greatest("result_1", "result_2", "result_3"),
-                        bw_percentage=ExpressionWrapper(
-                            F('max_result') * 100 / F('player__weight'),
+                        bw_percentage=Case(
+                            When(player__weight__gt=0, then=F('max_result') * 100.0 / F('player__weight')),
+                            default=0,
                             output_field=FloatField()
                         )
                     )
-                    .order_by(F('bw_percentage').desc(nulls_last=True))
+                    .order_by('-bw_percentage')
                 )
             elif discipline in [SEE_SAW_PRESS, KB_SQUAT]:
                 results = (
@@ -445,12 +448,13 @@ def update_overall_results(category):
                             F("result_left_2") + F("result_right_2"),
                             F("result_left_3") + F("result_right_3"),
                         ),
-                        bw_percentage=ExpressionWrapper(
-                            F('max_result') * 100 / F('player__weight'),
+                        bw_percentage=Case(
+                            When(player__weight__gt=0, then=F('max_result') * 100.0 / F('player__weight')),
+                            default=0,
                             output_field=FloatField()
                         )
                     )
-                    .order_by(F('bw_percentage').desc(nulls_last=True))
+                    .order_by('-bw_percentage')
                 )
 
             for position, result in enumerate(results, start=1):
