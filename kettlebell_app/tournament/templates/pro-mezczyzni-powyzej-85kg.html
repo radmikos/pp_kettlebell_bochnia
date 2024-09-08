@@ -131,8 +131,8 @@
           <th>Nazwisko</th>
           <th>Imię</th>
           <th>Waga</th>
-          {% if 'see_saw_press' in disciplines %}<th>See Saw Press Miejsce</th>{% endif %}
           {% if 'tgu' in disciplines %}<th>TGU Miejsce</th>{% endif %}
+          {% if 'see_saw_press' in disciplines %}<th>See Saw Press Miejsce</th>{% endif %}
           {% if 'kb_squat' in disciplines %}<th>Squat Miejsce</th>{% endif %}
           {% if 'pistol_squat' in disciplines %}<th>Pistol Squat Miejsce</th>{% endif %}
           {% if 'snatch' in disciplines %}<th>Snatch Test Miejsce</th>{% endif %}
@@ -149,8 +149,8 @@
           <td>{{ result.player.surname }}</td>
           <td>{{ result.player.name }}</td>
           <td>{{ result.weight|default_if_none:"-"|floatformat:1 }}</td>
-          {% if 'see_saw_press' in disciplines %}<td>{{ result.see_saw_press_place }}</td>{% endif %}
           {% if 'tgu' in disciplines %}<td>{{ result.tgu_place }}</td>{% endif %}
+          {% if 'see_saw_press' in disciplines %}<td>{{ result.see_saw_press_place }}</td>{% endif %}
           {% if 'kb_squat' in disciplines %}<td>{{ result.kb_squat_place }}</td>{% endif %}
           {% if 'pistol_squat' in disciplines %}<td>{{ result.pistol_squat_place }}</td>{% endif %}
           {% if 'snatch' in disciplines %}<td>{{ result.snatch_place }}</td>{% endif %}
