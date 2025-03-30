@@ -1,22 +1,23 @@
 from django.db import models
-from django.db.models import F
 from django.db.models.functions import Greatest
-from django.db.models import F, ExpressionWrapper, FloatField
-from django.db.models.functions import Greatest
+
+
+# snatch - powtórzenia * ciężar test, tgu - one rep /%BW, one kettlebell press - 3 próby /%BW, kb_squat -3proby (2x)/%BW, press (2x)/%bw - 3 próby
+
 
 # Discipline constants
 SNATCH = "snatch"
 TGU = "tgu"
-SEE_SAW_PRESS = "see_saw_press"
-KB_SQUAT = "kb_squat"
-PISTOL_SQUAT = "pistol_squat"
+ONE_KB_PRESS = "one_kettlebell_press"
+KB_SQUAT_2X = "kb_squat_2x"
+TWO_KB_PRESS = "two_kettlebell_press"
 
 AVAILABLE_DISCIPLINES = [
     (SNATCH, "Snatch"),
     (TGU, "Turkish Get-Up"),
-    (SEE_SAW_PRESS, "See Saw Press"),
-    (KB_SQUAT, "Kettlebell Squat"),
-    (PISTOL_SQUAT, "Pistol Squat"),
+    (ONE_KB_PRESS, "One Kettlebell Press"),
+    (KB_SQUAT_2X, "Kettlebell Squat x2"),
+    (TWO_KB_PRESS, "Two Kettlebells Press"),
 ]
 
 
