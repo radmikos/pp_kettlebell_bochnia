@@ -1,20 +1,23 @@
 from django.db import models
-from django.db.models import F
 from django.db.models.functions import Greatest
+
+
+# snatch - powtórzenia * ciężar test, tgu - one rep /%BW, one kettlebell press - 3 próby /%BW, kb_squat -3proby (2x)/%BW, press (2x)/%bw - 3 próby
+
 
 # Discipline constants
 SNATCH = "snatch"
 TGU = "tgu"
-SEE_SAW_PRESS = "see_saw_press"
-KB_SQUAT = "kb_squat"
-PISTOL_SQUAT = "pistol_squat"
+ONE_KB_PRESS = "one_kettlebell_press"
+KB_SQUAT_2X = "kb_squat_2x"
+TWO_KB_PRESS = "two_kettlebell_press"
 
 AVAILABLE_DISCIPLINES = [
     (SNATCH, "Snatch"),
     (TGU, "Turkish Get-Up"),
-    (SEE_SAW_PRESS, "See Saw Press"),
-    (KB_SQUAT, "Kettlebell Squat"),
-    (PISTOL_SQUAT, "Pistol Squat"),
+    (ONE_KB_PRESS, "One Kettlebell Press"),
+    (KB_SQUAT_2X, "Kettlebell Squat x2"),
+    (TWO_KB_PRESS, "Two Kettlebells Press"),
 ]
 
 
@@ -75,6 +78,9 @@ class Player(models.Model):
     tiebreak = models.BooleanField(default=False)
 
     _updating_results = False
+
+    def calculate_bw_percentage(self, weight):
+        return (weight / self.weight) * 100 if self.weight else 0
 
     def update_results(self):
         if self._updating_results:
@@ -223,12 +229,13 @@ class TGUResult(models.Model):
     def get_max_result(self):
         return max(self.result_1 or 0, self.result_2 or 0, self.result_3 or 0)
 
+    # def calculate_bw_percentage(self):
+    #     if self.player.weight:
+    #         max_result = self.get_max_result()
+    #         return (max_result / self.player.weight) * 100
+    #     return 0
     def calculate_bw_percentage(self):
-        if self.player.weight:
-            max_result = self.get_max_result()
-            return (max_result / self.player.weight) * 100
-        return 0
-
+        return self.player.calculate_bw_percentage(self.get_max_result())
 
 class PistolSquatResult(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -243,12 +250,13 @@ class PistolSquatResult(models.Model):
     def get_max_result(self):
         return max(self.result_1 or 0, self.result_2 or 0, self.result_3 or 0)
 
+    # def calculate_bw_percentage(self):
+    #     if self.player.weight:
+    #         max_result = self.get_max_result()
+    #         return (max_result / self.player.weight) * 100
+    #     return 0
     def calculate_bw_percentage(self):
-        if self.player.weight:
-            max_result = self.get_max_result()
-            return (max_result / self.player.weight) * 100
-        return 0
-
+        return self.player.calculate_bw_percentage(self.get_max_result())
 
 class SeeSawPressResult(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -281,7 +289,8 @@ class SeeSawPressResult(models.Model):
             else 0,
         ]
         return max(valid_attempts)
-
+    def calculate_bw_percentage(self):
+        return self.player.calculate_bw_percentage(self.get_max_result())
 
 class BestSeeSawPressResult(models.Model):
     player = models.OneToOneField(Player, on_delete=models.CASCADE)
@@ -334,6 +343,9 @@ class KBSquatResult(models.Model):
         ]
         return max(valid_attempts)
 
+    def calculate_bw_percentage(self):
+        return self.player.calculate_bw_percentage(self.get_max_result())
+
     def get_attempt_result(self, attempt_number):
         left = getattr(self, f"result_left_{attempt_number}")
         right = getattr(self, f"result_right_{attempt_number}")
@@ -384,6 +396,10 @@ class OverallResult(models.Model):
         return f"{self.player} - Total: {self.total_points:.1f}"
 
 
+from django.db.models import Case, When, F, FloatField
+from django.db.models import Case, When, F, FloatField
+
+
 def update_overall_results(category):
     disciplines = category.get_disciplines()
     players = Player.objects.filter(categories=category)
@@ -413,23 +429,26 @@ def update_overall_results(category):
             model = discipline_models[discipline]
             if discipline == SNATCH:
                 results = model.objects.filter(player__in=players).order_by("-result")
-            elif discipline in [TGU, PISTOL_SQUAT]:
-                results = (
-                    model.objects.filter(player__in=players)
-                    .annotate(max_result=Greatest("result_1", "result_2", "result_3"))
-                    .order_by("-max_result")
-                )
-            elif discipline in [SEE_SAW_PRESS, KB_SQUAT]:
+            else:
+                if discipline in [TGU, PISTOL_SQUAT]:
+                    max_result = Greatest("result_1", "result_2", "result_3")
+                else:  # SEE_SAW_PRESS, KB_SQUAT
+                    max_result = Greatest(
+                        F("result_left_1") + F("result_right_1"),
+                        F("result_left_2") + F("result_right_2"),
+                        F("result_left_3") + F("result_right_3"),
+                    )
+
                 results = (
                     model.objects.filter(player__in=players)
                     .annotate(
-                        max_result=Greatest(
-                            F("result_left_1") + F("result_right_1"),
-                            F("result_left_2") + F("result_right_2"),
-                            F("result_left_3") + F("result_right_3"),
+                        bw_percentage=Case(
+                            When(player__weight__gt=0, then=max_result * 100.0 / F('player__weight')),
+                            default=0,
+                            output_field=FloatField()
                         )
                     )
-                    .order_by("-max_result")
+                    .order_by('-bw_percentage')
                 )
 
             for position, result in enumerate(results, start=1):

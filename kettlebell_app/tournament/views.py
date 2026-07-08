@@ -150,7 +150,7 @@ def calculate_category_results(request, category_name, template_name):
         "snatch": {
             "model": SnatchResult,
             "calculate": lambda player, result: {
-                "max_result": result.result or 0,
+                "max_result": result.result if result.result is not None else 0,
                 "kettlebell_weight": player.snatch_kettlebell_weight,
                 "repetitions": player.snatch_repetitions,
             },
@@ -169,11 +169,7 @@ def calculate_category_results(request, category_name, template_name):
             "model": SeeSawPressResult,
             "calculate": lambda player, result: {
                 "max_result": result.get_max_result(),
-                "bw_percentage": round(
-                    (result.get_max_result() / player.weight) * 100, 1
-                )
-                if player.weight
-                else 0,
+                "bw_percentage": round(result.calculate_bw_percentage(), 2),
                 "attempt_1": f"{result.result_left_1:.1f}/{result.result_right_1:.1f}",
                 "attempt_2": f"{result.result_left_2:.1f}/{result.result_right_2:.1f}",
                 "attempt_3": f"{result.result_left_3:.1f}/{result.result_right_3:.1f}",
@@ -183,11 +179,7 @@ def calculate_category_results(request, category_name, template_name):
             "model": KBSquatResult,
             "calculate": lambda player, result: {
                 "max_result": result.get_max_result(),
-                "bw_percentage": round(
-                    (result.get_max_result() / player.weight) * 100, 1
-                )
-                if player.weight
-                else 0,
+                "bw_percentage": round(result.calculate_bw_percentage(), 2),
                 "attempt_1": f"{result.result_left_1:.1f}/{result.result_right_1:.1f}",
                 "attempt_2": f"{result.result_left_2:.1f}/{result.result_right_2:.1f}",
                 "attempt_3": f"{result.result_left_3:.1f}/{result.result_right_3:.1f}",
@@ -210,7 +202,6 @@ def calculate_category_results(request, category_name, template_name):
 
     for player in players:
         player_results = {"player": player, "weight": player.weight}
-        total_points = 0
 
         for discipline in disciplines:
             config = discipline_configs.get(discipline)
@@ -225,9 +216,7 @@ def calculate_category_results(request, category_name, template_name):
                         }
                         results[discipline].append(discipline_result)
                     except Exception as e:
-                        print(
-                            f"Error calculating results for {player} in {discipline}: {e}"
-                        )
+                        print(f"Error calculating results for {player} in {discipline}: {e}")
                         player_results[f"{discipline}_place"] = 0
                 else:
                     player_results[f"{discipline}_place"] = 0
@@ -237,35 +226,41 @@ def calculate_category_results(request, category_name, template_name):
         overall_results.append(player_results)
 
     for discipline in disciplines:
-        results[discipline].sort(key=lambda x: x["max_result"], reverse=True)
+        if discipline == "snatch":
+            results[discipline].sort(key=lambda x: (x["max_result"] is not None, x["max_result"]), reverse=True)
+            key_for_comparison = "max_result"
+        else:
+            results[discipline].sort(key=lambda x: (x["bw_percentage"] is not None, x["bw_percentage"]), reverse=True)
+            key_for_comparison = "bw_percentage"
+
         current_position = 1
         previous_result = None
+
         for index, result in enumerate(results[discipline]):
-            if (
-                previous_result is not None
-                and result["max_result"] != previous_result["max_result"]
-            ):
+            if previous_result is None or result[key_for_comparison] != previous_result[key_for_comparison]:
                 current_position = index + 1
             result["position"] = current_position
-            for overall_result in overall_results:
-                if overall_result["player"] == result["player"]:
-                    overall_result[f"{discipline}_place"] = current_position
-                    overall_result["total_points"] = (
-                        overall_result.get("total_points", 0) + current_position
-                    )
             previous_result = result
 
-    overall_results.sort(
-        key=lambda x: (x.get("total_points", 0), not x["player"].tiebreak)
-    )
+    # Obliczanie overall_results
+    for player_result in overall_results:
+        player = player_result["player"]
+        player_result["total_points"] = 0
+
+        for discipline in disciplines:
+            discipline_result = next((r for r in results[discipline] if r["player"] == player), None)
+            if discipline_result:
+                player_result[f"{discipline}_place"] = discipline_result["position"]
+                player_result["total_points"] += discipline_result["position"]
+            else:
+                player_result[f"{discipline}_place"] = 0
+
+    overall_results.sort(key=lambda x: (x.get("total_points", 0), not x["player"].tiebreak))
     current_position = 1
     previous_score = None
     for index, result in enumerate(overall_results):
-        result["final_score"] = (
-            result.get("total_points", 0) - 0.5
-            if result["player"].tiebreak
-            else result.get("total_points", 0)
-        )
+        result["final_score"] = result.get("total_points", 0) - 0.5 if result["player"].tiebreak else result.get(
+            "total_points", 0)
         if previous_score is not None and result["final_score"] != previous_score:
             current_position = index + 1
         result["total_place"] = current_position
