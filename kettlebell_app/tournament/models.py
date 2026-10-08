@@ -12,6 +12,11 @@ ONE_KB_PRESS = "one_kettlebell_press"
 KB_SQUAT_2X = "kb_squat_2x"
 TWO_KB_PRESS = "two_kettlebell_press"
 
+# Keys stored in Category.disciplines (used by update_overall_results)
+SEE_SAW_PRESS = "see_saw_press"
+KB_SQUAT = "kb_squat"
+PISTOL_SQUAT = "pistol_squat"
+
 AVAILABLE_DISCIPLINES = [
     (SNATCH, "Snatch"),
     (TGU, "Turkish Get-Up"),

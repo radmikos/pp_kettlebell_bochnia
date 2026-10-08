@@ -1,8 +1,10 @@
+import os
+
 from kettlebell_app.settings.base import *
 
 DEBUG = False
 
-SECRET_KEY = "REMOVED"
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 ALLOWED_HOSTS = ["ppkettlebell.toadres.pl", "localhost"]
 CSRF_TRUSTED_ORIGINS = ["https://ppkettlebell.toadres.pl"]
